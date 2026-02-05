@@ -23,19 +23,19 @@ async def create_tables():
     print("Creating database tables...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    print("✅ Database tables created successfully!")
+    print("Database tables created successfully!")
 
 
 async def drop_tables():
     """Drop all database tables (use with caution!)."""
-    print("⚠️  WARNING: This will drop all tables!")
+    print("WARNING: This will drop all tables!")
     response = input("Are you sure? (yes/no): ")
     if response.lower() == "yes":
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
-        print("✅ Database tables dropped successfully!")
+        print("Database tables dropped successfully!")
     else:
-        print("❌ Operation cancelled.")
+        print("Operation cancelled.")
 
 
 async def check_connection():
@@ -44,10 +44,10 @@ async def check_connection():
     try:
         async with engine.connect() as conn:
             await conn.execute("SELECT 1")
-        print("✅ Database connection successful!")
+        print("Database connection successful!")
         return True
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+        print(f"Database connection failed: {e}")
         return False
 
 

@@ -1,4 +1,4 @@
-# Development Dockerfile for Auth Service
+# Development Dockerfile for Application Service
 FROM python:3.11-slim
 
 # Set working directory
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements from service directory
-COPY services/auth/requirements.txt /tmp/requirements.txt
+COPY services/application/requirements.txt /tmp/requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
@@ -21,10 +21,10 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 ENV PYTHONPATH=/workspace
 
 # Change to service directory
-WORKDIR /workspace/services/auth
+WORKDIR /workspace/services/application
 
 # Expose port
-EXPOSE 8001
+EXPOSE 8002
 
 # Run application with reload for development
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]

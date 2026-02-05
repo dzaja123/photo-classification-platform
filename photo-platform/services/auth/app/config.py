@@ -47,8 +47,8 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = Field(default=7)
     
     # CORS
-    cors_origins: List[str] = Field(
-        default=["http://localhost:5173", "http://localhost:3000"]
+    cors_origins: str = Field(
+        default="http://localhost:5173,http://localhost:3000"
     )
     cors_allow_credentials: bool = Field(default=True)
     
@@ -71,13 +71,10 @@ class Settings(BaseSettings):
         extra="ignore"
     )
     
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v):
-        """Parse CORS origins from comma-separated string or list."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Get CORS origins as list."""
+        return [origin.strip() for origin in self.cors_origins.split(",")]
 
 
 @lru_cache

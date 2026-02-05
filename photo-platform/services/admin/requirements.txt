@@ -1,0 +1,29 @@
+# FastAPI and server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy[asyncio]==2.0.25
+asyncpg==0.29.0
+
+# MongoDB for audit logs
+motor==3.3.2
+pymongo==4.6.1
+
+# Redis
+redis[hiredis]==5.0.1
+
+# Authentication (JWT verification)
+python-jose[cryptography]==3.3.0
+
+# Validation
+pydantic==2.5.3
+pydantic-settings==2.1.0
+email-validator==2.1.0
+
+# Data export
+pandas==2.1.4
+
+# Utilities
+python-dotenv==1.0.0

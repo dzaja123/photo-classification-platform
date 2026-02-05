@@ -1,0 +1,5 @@
+"""Database models for Admin Service."""
+
+from app.models.submission import Submission
+
+__all__ = ["Submission"]

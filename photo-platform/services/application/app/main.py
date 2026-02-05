@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings
 from app.core.database import engine
 
+from app.api.v1 import submissions
 
 settings = get_settings()
 
@@ -52,9 +53,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers (will be added as we create them)
-# from app.api.v1 import submissions
-# app.include_router(submissions.router, prefix="/api/v1/submissions", tags=["Submissions"])
+# Include routers
+app.include_router(submissions.router, prefix="/api/v1/submissions", tags=["Submissions"])
 
 
 @app.get("/api/v1/status", tags=["Status"])

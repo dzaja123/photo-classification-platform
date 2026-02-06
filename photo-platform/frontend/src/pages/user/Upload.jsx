@@ -52,13 +52,25 @@ export default function Upload() {
     data.append('country', formData.country);
 
     try {
-      await appAPI.uploadPhoto(data);
+      const response = await appAPI.uploadPhoto(data);
+      setUploadedId(response.data.id);
       setSuccess(true);
+      setError('');
+      
+      // Don't block - let user navigate immediately
+      // Classification happens in background
       setTimeout(() => {
         navigate('/dashboard');
-      }, 2000);
+      }, 3000);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Upload failed. Please try again.');
+      const errorMsg = err.response?.data?.detail || err.response?.data?.message;
+      if (err.response?.status === 413) {
+        setError('File too large. Maximum size is 10MB.');
+      } else if (err.response?.status === 415) {
+        setError('Invalid file type. Please upload an image (JPG, PNG, GIF).');
+      } else {
+        setError(errorMsg || 'Upload failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -71,7 +83,8 @@ export default function Upload() {
 
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-6">
-            Photo uploaded successfully! Redirecting to dashboard...
+            <p className="font-semibold">Photo uploaded successfully!</p>
+            <p className="text-sm mt-1">Classification is processing in the background. You can view results in your dashboard.</p>
           </div>
         )}
 

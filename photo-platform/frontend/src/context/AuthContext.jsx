@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../lib/api';
+import { STORAGE_KEYS } from '../lib/constants';
 
 const AuthContext = createContext(null);
 
@@ -20,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuth = async () => {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
     if (token) {
       try {
         const response = await authAPI.getMe();
@@ -29,8 +30,8 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
       } catch (error) {
         console.error('Auth check failed:', error);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
         setUser(null);
       }
     }
@@ -41,8 +42,8 @@ export const AuthProvider = ({ children }) => {
     const response = await authAPI.login({ username, password });
     // Backend returns: { success, message, data: { access_token, refresh_token, ... } }
     const tokens = response.data?.data || response.data;
-    localStorage.setItem('access_token', tokens.access_token);
-    localStorage.setItem('refresh_token', tokens.refresh_token);
+    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
     await checkAuth();
     return response.data;
   };
@@ -51,8 +52,8 @@ export const AuthProvider = ({ children }) => {
     const response = await authAPI.register(data);
     // Backend returns: { success, message, data: { user, access_token, refresh_token, ... } }
     const payload = response.data?.data || response.data;
-    localStorage.setItem('access_token', payload.access_token);
-    localStorage.setItem('refresh_token', payload.refresh_token);
+    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, payload.access_token);
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, payload.refresh_token);
     await checkAuth();
     return response.data;
   };
@@ -64,12 +65,11 @@ export const AuthProvider = ({ children }) => {
       // Logout should always succeed client-side even if server call fails
       console.error('Logout API error (ignored):', error);
     }
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     setUser(null);
   };
 
-  // Backend UserResponse.role is the enum value string: "USER" or "ADMIN"
   const isAdmin = user?.role === 'ADMIN';
 
   const value = {

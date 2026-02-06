@@ -14,7 +14,7 @@ from app.core.cache import is_token_blacklisted
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
-from shared.enums import UserRole
+from shared.enums import TokenType, UserRole
 from shared.audit_logger import AuditLogger, get_audit_logger_singleton
 
 
@@ -84,7 +84,7 @@ async def get_current_user(
         )
     
     # Check token type
-    if payload.get("token_type") != "access":
+    if payload.get("token_type") != TokenType.ACCESS:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type",

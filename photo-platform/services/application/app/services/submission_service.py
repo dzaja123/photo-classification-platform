@@ -12,6 +12,7 @@ from app.config import get_settings
 from app.core.storage import get_storage_client
 from app.models.submission import Submission
 from app.repositories.submission_repository import SubmissionRepository
+from shared.enums import SubmissionStatus
 
 
 settings = get_settings()
@@ -127,7 +128,7 @@ class SubmissionService:
             photo_path=photo_path,
             photo_size=file_size,
             photo_mime_type=photo.content_type,
-            classification_status="pending",
+            classification_status=SubmissionStatus.PENDING,
             created_at=now,
             updated_at=now,
             is_deleted=False,

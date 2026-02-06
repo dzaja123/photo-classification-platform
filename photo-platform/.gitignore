@@ -23,7 +23,7 @@ build/
 .env
 .env.local
 .env.*.local
-*.env
+!.env.example
 
 # Database
 *.db
@@ -47,7 +47,7 @@ Thumbs.db
 .Trash-*
 
 # Docker
-.dockerignore
+# (keep .dockerignore tracked)
 
 # Alembic
 alembic/versions/*.pyc

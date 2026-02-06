@@ -105,6 +105,20 @@ export default function Dashboard() {
             {submissions.map((submission) => (
               <div key={submission.id} className="card hover:shadow-lg transition-shadow relative group">
                 <div className="space-y-3">
+                  {/* Photo thumbnail */}
+                  <div className="w-full h-40 bg-gray-100 rounded-lg overflow-hidden -mt-2">
+                    <img
+                      src={appAPI.getPhotoUrl(submission.id)}
+                      alt={submission.photo_filename}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
+                        e.target.parentElement.innerHTML = '<svg class="h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
+                      }}
+                    />
+                  </div>
+
                   <div className="flex justify-between items-start">
                     <h3 className="font-semibold text-lg truncate pr-2">{submission.name}</h3>
                     <span className={`flex-shrink-0 px-2 py-1 text-xs rounded-full ${getStatusBadge(submission.classification_status)}`}>

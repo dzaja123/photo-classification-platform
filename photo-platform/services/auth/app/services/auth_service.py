@@ -24,7 +24,7 @@ from app.repositories.token_repository import TokenRepository
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
 from app.schemas.auth import TokenResponse
 from shared.audit_logger import AuditLogger
-from shared.enums import AuditEventType, AuditEventStatus
+from shared.enums import AuditEventType, AuditEventStatus, TokenType
 
 
 settings = get_settings()
@@ -321,7 +321,7 @@ class AuthService:
             )
         
         # Check token type
-        if payload.get("token_type") != "refresh":
+        if payload.get("token_type") != TokenType.REFRESH:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token type"

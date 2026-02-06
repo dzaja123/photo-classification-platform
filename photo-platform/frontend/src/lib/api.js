@@ -1,20 +1,28 @@
 import axios from 'axios';
+import {
+  API_BASE_URLS,
+  AUTH_ENDPOINTS,
+  APP_ENDPOINTS,
+  ADMIN_ENDPOINTS,
+  STORAGE_KEYS,
+  ROUTES,
+} from './constants';
 
 // ---------------------------------------------------------------------------
-// Axios instances
+// Axios instances (base URLs from environment variables)
 // ---------------------------------------------------------------------------
 
 const AUTH_API = axios.create({
-  baseURL: 'http://localhost:8001/api/v1',
+  baseURL: API_BASE_URLS.AUTH,
   headers: { 'Content-Type': 'application/json' },
 });
 
 const APP_API = axios.create({
-  baseURL: 'http://localhost:8002/api/v1',
+  baseURL: API_BASE_URLS.APP,
 });
 
 const ADMIN_API = axios.create({
-  baseURL: 'http://localhost:8003/api/v1',
+  baseURL: API_BASE_URLS.ADMIN,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -23,7 +31,7 @@ const ADMIN_API = axios.create({
 // ---------------------------------------------------------------------------
 
 const addAuthToken = (config) => {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -75,18 +83,18 @@ const createRefreshInterceptor = (instance) => {
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('refresh_token');
+      const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
       if (!refreshToken) {
         isRefreshing = false;
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        window.location.href = ROUTES.LOGIN;
         return Promise.reject(error);
       }
 
       try {
         const { data } = await axios.post(
-          'http://localhost:8001/api/v1/auth/refresh',
+          `${API_BASE_URLS.AUTH}${AUTH_ENDPOINTS.REFRESH}`,
           { refresh_token: refreshToken },
           { headers: { 'Content-Type': 'application/json' } }
         );
@@ -95,9 +103,9 @@ const createRefreshInterceptor = (instance) => {
         const newAccessToken = tokens.access_token;
         const newRefreshToken = tokens.refresh_token;
 
-        localStorage.setItem('access_token', newAccessToken);
+        localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, newAccessToken);
         if (newRefreshToken) {
-          localStorage.setItem('refresh_token', newRefreshToken);
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
         }
 
         processQueue(null, newAccessToken);
@@ -105,9 +113,9 @@ const createRefreshInterceptor = (instance) => {
         return instance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        window.location.href = ROUTES.LOGIN;
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -125,14 +133,14 @@ createRefreshInterceptor(ADMIN_API);
 // ---------------------------------------------------------------------------
 
 export const authAPI = {
-  register: (data) => AUTH_API.post('/auth/register', data),
-  login: (data) => AUTH_API.post('/auth/login', data),
+  register: (data) => AUTH_API.post(AUTH_ENDPOINTS.REGISTER, data),
+  login: (data) => AUTH_API.post(AUTH_ENDPOINTS.LOGIN, data),
   logout: () => {
-    const refreshToken = localStorage.getItem('refresh_token');
-    return AUTH_API.post('/auth/logout', { refresh_token: refreshToken || null });
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    return AUTH_API.post(AUTH_ENDPOINTS.LOGOUT, { refresh_token: refreshToken || null });
   },
-  getMe: () => AUTH_API.get('/users/me'),
-  refresh: (refreshToken) => AUTH_API.post('/auth/refresh', { refresh_token: refreshToken }),
+  getMe: () => AUTH_API.get(AUTH_ENDPOINTS.ME),
+  refresh: (refreshToken) => AUTH_API.post(AUTH_ENDPOINTS.REFRESH, { refresh_token: refreshToken }),
 };
 
 // ---------------------------------------------------------------------------
@@ -140,12 +148,16 @@ export const authAPI = {
 // ---------------------------------------------------------------------------
 
 export const appAPI = {
-  uploadPhoto: (formData) => APP_API.post('/submissions/upload', formData, {
+  uploadPhoto: (formData) => APP_API.post(APP_ENDPOINTS.UPLOAD, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  getSubmissions: (params) => APP_API.get('/submissions/', { params }),
-  getSubmission: (id) => APP_API.get(`/submissions/${id}`),
-  deleteSubmission: (id) => APP_API.delete(`/submissions/${id}`),
+  getSubmissions: (params) => APP_API.get(APP_ENDPOINTS.LIST, { params }),
+  getSubmission: (id) => APP_API.get(APP_ENDPOINTS.DETAIL(id)),
+  deleteSubmission: (id) => APP_API.delete(APP_ENDPOINTS.DELETE(id)),
+  getPhotoUrl: (submissionId) => {
+    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    return `${API_BASE_URLS.APP}${APP_ENDPOINTS.PHOTO(submissionId)}?token=${token}`;
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -153,15 +165,15 @@ export const appAPI = {
 // ---------------------------------------------------------------------------
 
 export const adminAPI = {
-  getSubmissions: (params) => ADMIN_API.get('/admin/submissions', { params }),
-  getSubmission: (id) => ADMIN_API.get(`/admin/submissions/${id}`),
-  getAnalytics: () => ADMIN_API.get('/admin/analytics'),
-  getAuditLogs: (params) => ADMIN_API.get('/admin/audit-logs', { params }),
-  exportCSV: (params) => ADMIN_API.get('/admin/export/submissions/csv', {
+  getSubmissions: (params) => ADMIN_API.get(ADMIN_ENDPOINTS.SUBMISSIONS, { params }),
+  getSubmission: (id) => ADMIN_API.get(ADMIN_ENDPOINTS.SUBMISSION_DETAIL(id)),
+  getAnalytics: () => ADMIN_API.get(ADMIN_ENDPOINTS.ANALYTICS),
+  getAuditLogs: (params) => ADMIN_API.get(ADMIN_ENDPOINTS.AUDIT_LOGS, { params }),
+  exportCSV: (params) => ADMIN_API.get(ADMIN_ENDPOINTS.EXPORT_CSV, {
     params,
     responseType: 'blob',
   }),
-  exportJSON: (params) => ADMIN_API.get('/admin/export/submissions/json', {
+  exportJSON: (params) => ADMIN_API.get(ADMIN_ENDPOINTS.EXPORT_JSON, {
     params,
     responseType: 'blob',
   }),

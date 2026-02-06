@@ -11,7 +11,7 @@ import bcrypt
 from jose import JWTError, jwt
 
 from app.config import get_settings
-from shared.enums import UserRole
+from shared.enums import TokenType, UserRole
 
 
 settings = get_settings()
@@ -110,7 +110,7 @@ def create_access_token(
         "exp": expire,
         "iat": now,
         "jti": secrets.token_urlsafe(32),  # JWT ID for blacklisting
-        "token_type": "access"
+        "token_type": TokenType.ACCESS
     }
     
     encoded_jwt = jwt.encode(
@@ -160,7 +160,7 @@ def create_refresh_token(
         "exp": expire,
         "iat": now,
         "jti": secrets.token_urlsafe(32),
-        "token_type": "refresh"
+        "token_type": TokenType.REFRESH
     }
     
     encoded_jwt = jwt.encode(

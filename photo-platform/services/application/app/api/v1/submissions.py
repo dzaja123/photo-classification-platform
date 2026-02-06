@@ -10,12 +10,17 @@ from fastapi import (
     Depends,
     File,
     Form,
+    HTTPException,
+    Response,
     UploadFile,
+    status,
 )
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_user_id
+from jose import JWTError
+
+from app.api.dependencies import _decode_token, get_current_user_id
 from app.config import get_settings
 from app.core.database import AsyncSessionLocal, get_db
 from app.core.storage import get_storage_client
@@ -23,6 +28,7 @@ from app.ml.classifier import get_classifier
 from app.models.submission import Submission
 from app.schemas.submission import SubmissionResponse, SubmissionListResponse
 from app.services.submission_service import SubmissionService
+from shared.enums import SubmissionStatus, TokenType
 
 
 router = APIRouter()
@@ -54,7 +60,7 @@ async def classify_submission_background(submission_id: uuid.UUID) -> None:
                 return
 
             # Mark as processing
-            submission.classification_status = "processing"
+            submission.classification_status = SubmissionStatus.PROCESSING
             await db.commit()
 
             # Download photo from storage
@@ -67,7 +73,7 @@ async def classify_submission_background(submission_id: uuid.UUID) -> None:
 
             # Persist results
             submission.classification_results = predictions
-            submission.classification_status = "completed"
+            submission.classification_status = SubmissionStatus.COMPLETED
             submission.classified_at = datetime.now(timezone.utc)
             submission.classification_error = None
             await db.commit()
@@ -81,7 +87,7 @@ async def classify_submission_background(submission_id: uuid.UUID) -> None:
                 )
                 submission = result.scalar_one_or_none()
                 if submission:
-                    submission.classification_status = "failed"
+                    submission.classification_status = SubmissionStatus.FAILED
                     submission.classification_error = str(e)
                     await db.commit()
             except Exception:
@@ -204,3 +210,68 @@ async def delete_submission(
     service = SubmissionService(db)
     await service.delete_submission(submission_id, user_id)
     return None
+
+
+@router.get("/{submission_id}/photo")
+async def get_submission_photo(
+    submission_id: uuid.UUID,
+    token: str = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Serve a submission's photo directly.
+
+    Accepts JWT as a `token` query parameter so that `<img src="...">` tags
+    can authenticate without setting headers.
+
+    Downloads the image from MinIO and streams it to the client, avoiding
+    redirect issues when MinIO is on an internal Docker network.
+    """
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token required",
+        )
+
+    try:
+        payload = _decode_token(token)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+
+    if payload.get("token_type") != TokenType.ACCESS:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type",
+        )
+
+    result = await db.execute(
+        select(Submission).where(
+            Submission.id == submission_id,
+            Submission.is_deleted.is_(False),
+        )
+    )
+    submission = result.scalar_one_or_none()
+
+    if not submission:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Submission not found",
+        )
+
+    storage = get_storage_client()
+    try:
+        photo_bytes = storage.download_file(submission.photo_path)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Photo file not found in storage",
+        )
+
+    return Response(
+        content=photo_bytes,
+        media_type=submission.photo_mime_type,
+        headers={"Cache-Control": "private, max-age=3600"},
+    )

@@ -9,6 +9,12 @@ class UserRole(str, Enum):
     ADMIN = "ADMIN"
 
 
+class TokenType(str, Enum):
+    """JWT token type enumeration."""
+    ACCESS = "access"
+    REFRESH = "refresh"
+
+
 class Gender(str, Enum):
     """Gender enumeration."""
     MALE = "Male"
@@ -18,6 +24,7 @@ class Gender(str, Enum):
 
 class SubmissionStatus(str, Enum):
     """Submission status enumeration."""
+    PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"

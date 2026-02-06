@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from shared.enums import SubmissionStatus
 
 
 class Submission(Base):
@@ -95,7 +96,7 @@ class Submission(Base):
     classification_status: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        default="pending",
+        default=SubmissionStatus.PENDING,
         index=True,
         comment="Status: pending, processing, completed, failed"
     )

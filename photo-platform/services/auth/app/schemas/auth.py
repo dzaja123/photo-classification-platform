@@ -1,5 +1,6 @@
 """Authentication Pydantic schemas."""
 
+import re
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -125,8 +126,6 @@ class PasswordChangeRequest(BaseModel):
         
         Same requirements as registration password.
         """
-        import re
-        
         if len(v) < 8:
             raise ValueError("Password must be at least 8 characters long")
         

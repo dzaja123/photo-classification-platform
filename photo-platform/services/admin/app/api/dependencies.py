@@ -8,7 +8,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
 from app.config import get_settings
-from shared.enums import UserRole
+from shared.enums import TokenType, UserRole
 
 
 settings = get_settings()
@@ -59,7 +59,7 @@ async def get_current_admin(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    if payload.get("token_type") != "access":
+    if payload.get("token_type") != TokenType.ACCESS:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type",

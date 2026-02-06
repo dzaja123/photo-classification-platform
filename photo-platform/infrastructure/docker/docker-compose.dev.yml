@@ -180,6 +180,23 @@ services:
       - photo-platform
     restart: unless-stopped
 
+  # Frontend Service
+  frontend:
+    build:
+      context: ../..
+      dockerfile: frontend/Dockerfile
+    container_name: photo-platform-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - photo-platform
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:

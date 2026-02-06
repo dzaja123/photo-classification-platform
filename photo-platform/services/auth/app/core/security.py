@@ -1,21 +1,20 @@
 """Security utilities for password hashing and JWT tokens."""
 
+import base64
+import hashlib
 import secrets
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 from uuid import UUID
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.config import get_settings
 from shared.enums import UserRole
 
 
 settings = get_settings()
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
@@ -32,8 +31,21 @@ def hash_password(password: str) -> str:
         >>> hashed = hash_password("SecurePass123!")
         >>> verify_password("SecurePass123!", hashed)
         True
+    
+    Note:
+        Bcrypt has a 72-byte password limit. Following pyca/bcrypt best practices,
+        we pre-hash with SHA256 and base64 encode to handle any password length
+        while preserving full entropy and avoiding NULL byte issues.
     """
-    return pwd_context.hash(password)
+    # Pre-hash with SHA256 and base64 encode (pyca/bcrypt recommended approach)
+    # This handles passwords of any length and avoids NULL byte issues
+    password_hash = hashlib.sha256(password.encode('utf-8')).digest()
+    password_b64 = base64.b64encode(password_hash)
+    
+    # Use bcrypt directly
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_b64, salt)
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -54,7 +66,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         >>> verify_password("WrongPass", hashed)
         False
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    # Apply same SHA256 + base64 pre-hash as in hash_password
+    password_hash = hashlib.sha256(plain_password.encode('utf-8')).digest()
+    password_b64 = base64.b64encode(password_hash)
+    return bcrypt.checkpw(password_b64, hashed_password.encode('utf-8'))
 
 
 def create_access_token(

@@ -80,6 +80,9 @@ export default function Dashboard() {
                     <p>Age: {submission.age}</p>
                     <p>Gender: {submission.gender}</p>
                     <p>Location: {submission.location}, {submission.country}</p>
+                    {submission.description && (
+                      <p className="text-xs text-gray-500 italic mt-2">{submission.description}</p>
+                    )}
                   </div>
 
                   {submission.classification_results && submission.classification_results.length > 0 && (
@@ -98,8 +101,9 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  <div className="text-xs text-gray-400 mt-4">
-                    Uploaded: {new Date(submission.created_at).toLocaleDateString()}
+                  <div className="text-xs text-gray-400 mt-4 pt-3 border-t border-gray-100">
+                    <div>Uploaded: {new Date(submission.created_at).toLocaleDateString()}</div>
+                    <div>{new Date(submission.created_at).toLocaleTimeString()}</div>
                   </div>
                 </div>
               </div>

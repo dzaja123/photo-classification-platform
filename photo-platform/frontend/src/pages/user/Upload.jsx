@@ -10,6 +10,7 @@ export default function Upload() {
     gender: '',
     location: '',
     country: '',
+    description: '',
   });
   const [photo, setPhoto] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -50,6 +51,9 @@ export default function Upload() {
     data.append('gender', formData.gender);
     data.append('location', formData.location);
     data.append('country', formData.country);
+    if (formData.description) {
+      data.append('description', formData.description);
+    }
 
     try {
       const response = await appAPI.uploadPhoto(data);
@@ -213,6 +217,25 @@ export default function Upload() {
                 value={formData.country}
                 onChange={handleChange}
               />
+            </div>
+
+            <div className="md:col-span-2">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                Description (Optional)
+              </label>
+              <textarea
+                name="description"
+                id="description"
+                rows="3"
+                maxLength="500"
+                className="input-field mt-1"
+                placeholder="Add any additional information (max 500 characters)"
+                value={formData.description}
+                onChange={handleChange}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                {formData.description.length}/500 characters
+              </p>
             </div>
           </div>
 

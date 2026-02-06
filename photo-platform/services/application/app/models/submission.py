@@ -62,6 +62,11 @@ class Submission(Base):
         nullable=False,
         comment="Submitter's country"
     )
+    description: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Optional description"
+    )
     
     # Photo information
     photo_filename: Mapped[str] = mapped_column(

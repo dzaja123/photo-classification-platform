@@ -15,6 +15,7 @@ class SubmissionCreate(BaseModel):
     gender: str = Field(..., min_length=1, max_length=50, description="Submitter's gender")
     location: str = Field(..., min_length=1, max_length=255, description="City/Location")
     country: str = Field(..., min_length=1, max_length=100, description="Country")
+    description: Optional[str] = Field(None, max_length=500, description="Optional description")
 
 
 class SubmissionResponse(BaseModel):
@@ -27,6 +28,7 @@ class SubmissionResponse(BaseModel):
     gender: str
     location: str
     country: str
+    description: Optional[str] = None
     photo_filename: str
     photo_path: str
     photo_size: int

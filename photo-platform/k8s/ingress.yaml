@@ -1,0 +1,73 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: photo-platform-ingress
+  namespace: photo-platform
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Increase upload size for photos
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+    # Timeouts for ML classification
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    # Rate limiting at ingress level
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    # TLS via cert-manager
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - photo-platform.example.com
+    - www.photo-platform.example.com
+    secretName: photo-platform-tls
+  rules:
+  # Frontend
+  - host: photo-platform.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 3000
+  
+  # API Routes
+  - host: api.photo-platform.example.com
+    http:
+      paths:
+      # Auth Service
+      - path: /api/v1/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 8001
+      - path: /api/v1/users
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 8001
+      
+      # Application Service
+      - path: /api/v1/submissions
+        pathType: Prefix
+        backend:
+          service:
+            name: app-service
+            port:
+              number: 8002
+      
+      # Admin Service
+      - path: /api/v1/admin
+        pathType: Prefix
+        backend:
+          service:
+            name: admin-service
+            port:
+              number: 8003

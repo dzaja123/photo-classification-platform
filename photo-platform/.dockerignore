@@ -1,0 +1,46 @@
+# Version control
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+diagrams/
+LICENSE
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Frontend dev artifacts
+frontend/node_modules/
+frontend/.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# K8s manifests (not needed in Docker images)
+k8s/
+
+# CI/CD
+.github/

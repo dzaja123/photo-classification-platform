@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: photo-platform-config
+  namespace: photo-platform
+data:
+  # Database
+  POSTGRES_HOST: "postgres-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "photo_platform"
+  
+  # Redis
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  
+  # MongoDB
+  MONGODB_HOST: "mongodb-service"
+  MONGODB_PORT: "27017"
+  MONGODB_DATABASE: "photo_platform"
+  
+  # MinIO
+  MINIO_ENDPOINT: "minio-service:9000"
+  MINIO_BUCKET_NAME: "photo-submissions"
+  MINIO_SECURE: "false"
+  
+  # Service URLs
+  AUTH_SERVICE_URL: "http://auth-service:8001"
+  APP_SERVICE_URL: "http://app-service:8002"
+  ADMIN_SERVICE_URL: "http://admin-service:8003"
+  
+  # CORS
+  CORS_ORIGINS: "https://photo-platform.example.com,https://www.photo-platform.example.com"
+  
+  # Application Settings
+  DEBUG: "false"
+  LOG_LEVEL: "INFO"

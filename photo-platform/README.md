@@ -75,13 +75,13 @@ npm run dev
 
 ```bash
 # Start all services
-docker-compose up -d
+docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d
 
 # View logs
-docker-compose logs -f
+docker-compose -f infrastructure/docker/docker-compose.dev.yml logs -f
 
 # Stop all services
-docker-compose down
+docker-compose -f infrastructure/docker/docker-compose.dev.yml down
 ```
 
 ## API Endpoints
@@ -161,7 +161,7 @@ railway up
 
 ```bash
 # Apply manifests
-kubectl apply -f infrastructure/kubernetes/
+kubectl apply -f k8s/
 
 # Check status
 kubectl get pods -n photo-platform

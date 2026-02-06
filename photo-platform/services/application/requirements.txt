@@ -3,30 +3,35 @@ fastapi==0.109.0
 uvicorn[standard]==0.27.0
 python-multipart==0.0.6
 
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
 # Database
 sqlalchemy[asyncio]==2.0.25
 asyncpg==0.29.0
 alembic==1.13.1
 
-# Authentication
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-
 # Redis
 redis[hiredis]==5.0.1
 
-# MinIO (S3-compatible storage)
+# Storage (MinIO/S3)
+boto3==1.34.34
 minio==7.2.3
 
-# ML - TensorFlow Lite
+# Image processing
+Pillow==10.2.0
+
+# Machine Learning
 tensorflow==2.15.0
-pillow==10.2.0
 numpy==1.26.3
+
+# Background tasks (built into FastAPI)
+# No additional dependencies needed
 
 # Validation
 pydantic==2.5.3
 pydantic-settings==2.1.0
-email-validator==2.1.0
 
 # Utilities
 python-dotenv==1.0.0

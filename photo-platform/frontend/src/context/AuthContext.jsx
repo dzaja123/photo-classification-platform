@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../lib/api';
-import { STORAGE_KEYS } from '../lib/constants';
+import { STORAGE_KEYS, USER_ROLES } from '../lib/constants';
 
 const AuthContext = createContext(null);
 
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === USER_ROLES.ADMIN;
 
   const value = {
     user,

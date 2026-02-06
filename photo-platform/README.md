@@ -99,6 +99,7 @@ docker-compose -f infrastructure/docker/docker-compose.dev.yml down
 - `GET /api/v1/submissions/` - List user submissions (auth required)
 - `GET /api/v1/submissions/{id}` - Get submission details (auth required)
 - `DELETE /api/v1/submissions/{id}` - Delete submission (auth required)
+- `GET /api/v1/submissions/{id}/photo` - Get photo preview (auth required)
 - `GET /health` - Health check
 
 ### Admin Service (Port 8003)
@@ -145,19 +146,7 @@ npm test
 
 ## Deployment
 
-### Railway
-
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway init
-railway up
-```
-
-### Kubernetes
+### Kubernetes (Primary)
 
 ```bash
 # Apply manifests

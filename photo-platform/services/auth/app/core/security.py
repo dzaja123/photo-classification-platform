@@ -3,7 +3,7 @@
 import base64
 import hashlib
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 from uuid import UUID
 
@@ -100,7 +100,7 @@ def create_access_token(
     if expires_delta is None:
         expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     expire = now + expires_delta
     
     payload = {
@@ -150,7 +150,7 @@ def create_refresh_token(
     if expires_delta is None:
         expires_delta = timedelta(days=settings.refresh_token_expire_days)
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     expire = now + expires_delta
     
     payload = {

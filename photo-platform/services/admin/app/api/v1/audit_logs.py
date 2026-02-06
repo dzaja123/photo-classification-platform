@@ -7,6 +7,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, Query
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app.api.dependencies import get_current_admin
 from app.core.mongodb import get_mongodb
 from app.schemas.audit_log import (
     AuditLogResponse,
@@ -27,7 +28,8 @@ async def list_audit_logs(
     date_to: Optional[datetime] = Query(None, description="End date"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=100, description="Items per page"),
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    db: AsyncIOMotorDatabase = Depends(get_mongodb),
+    _admin: dict = Depends(get_current_admin),
 ):
     """
     List audit logs with filtering.
@@ -100,7 +102,8 @@ async def list_audit_logs(
 async def get_user_activity(
     user_id: str,
     limit: int = Query(50, ge=1, le=200, description="Maximum events to return"),
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    db: AsyncIOMotorDatabase = Depends(get_mongodb),
+    _admin: dict = Depends(get_current_admin),
 ):
     """
     Get activity timeline for a specific user.
@@ -149,7 +152,8 @@ async def get_user_activity(
 @router.get("/audit-logs/security", response_model=SecurityEventsResponse)
 async def get_security_events(
     limit: int = Query(100, ge=1, le=500, description="Maximum events to return"),
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    db: AsyncIOMotorDatabase = Depends(get_mongodb),
+    _admin: dict = Depends(get_current_admin),
 ):
     """
     Get security-related events.

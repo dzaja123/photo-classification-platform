@@ -1,6 +1,6 @@
 """User repository for database operations."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -134,7 +134,7 @@ class UserRepository:
             return await self.get_by_id(user_id)
         
         # Add updated_at timestamp
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now(timezone.utc)
         
         # Execute update
         await self.db.execute(
@@ -156,7 +156,7 @@ class UserRepository:
         await self.db.execute(
             update(User)
             .where(User.id == user_id)
-            .values(last_login=datetime.utcnow())
+            .values(last_login=datetime.now(timezone.utc))
         )
     
     async def deactivate(self, user_id: UUID) -> Optional[User]:
@@ -172,7 +172,7 @@ class UserRepository:
         await self.db.execute(
             update(User)
             .where(User.id == user_id)
-            .values(is_active=False, updated_at=datetime.utcnow())
+            .values(is_active=False, updated_at=datetime.now(timezone.utc))
         )
         
         return await self.get_by_id(user_id)
@@ -190,7 +190,7 @@ class UserRepository:
         await self.db.execute(
             update(User)
             .where(User.id == user_id)
-            .values(is_active=True, updated_at=datetime.utcnow())
+            .values(is_active=True, updated_at=datetime.now(timezone.utc))
         )
         
         return await self.get_by_id(user_id)
@@ -208,7 +208,7 @@ class UserRepository:
         await self.db.execute(
             update(User)
             .where(User.id == user_id)
-            .values(is_verified=True, updated_at=datetime.utcnow())
+            .values(is_verified=True, updated_at=datetime.now(timezone.utc))
         )
         
         return await self.get_by_id(user_id)
@@ -231,7 +231,7 @@ class UserRepository:
             .where(User.id == user_id)
             .values(
                 hashed_password=hashed_password,
-                updated_at=datetime.utcnow()
+                updated_at=datetime.now(timezone.utc)
             )
         )
         
@@ -251,7 +251,7 @@ class UserRepository:
         await self.db.execute(
             update(User)
             .where(User.id == user_id)
-            .values(role=new_role, updated_at=datetime.utcnow())
+            .values(role=new_role, updated_at=datetime.now(timezone.utc))
         )
         
         return await self.get_by_id(user_id)

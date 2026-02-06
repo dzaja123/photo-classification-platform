@@ -17,6 +17,7 @@ class SubmissionResponse(BaseModel):
     gender: str
     location: str
     country: str
+    description: Optional[str] = None
     photo_filename: str
     photo_path: str
     photo_size: int

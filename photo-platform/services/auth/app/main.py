@@ -1,5 +1,6 @@
 """FastAPI application entry point."""
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +22,7 @@ from app.middleware.rate_limit import add_rate_limit_headers
 
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -32,18 +34,13 @@ async def lifespan(app: FastAPI):
     - Startup: Initialize database connections
     - Shutdown: Close database connections
     """
-    # Startup
-    print(f"Starting {settings.app_name} v{settings.app_version}")
-    print("Database engine initialized")
-    print("Redis connection pool ready")
+    logger.info("Starting %s v%s", settings.app_name, settings.app_version)
     
     yield
     
-    # Shutdown
-    print("Shutting down...")
+    logger.info("Shutting down")
     await engine.dispose()
     await close_redis()
-    print("Connections closed")
 
 
 # Create FastAPI application
@@ -56,11 +53,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware - Allow all origins for development
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=settings.cors_origins_list,
+    allow_credentials=settings.cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],

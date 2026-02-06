@@ -1,6 +1,6 @@
 """Refresh token repository for database operations."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -47,7 +47,7 @@ class TokenRepository:
             >>> token = await token_repo.create(
             ...     user_id=UUID("123e4567-e89b-12d3-a456-426614174000"),
             ...     token="hashed_token",
-            ...     expires_at=datetime.utcnow() + timedelta(days=7)
+            ...     expires_at=datetime.now(timezone.utc) + timedelta(days=7)
             ... )
         """
         refresh_token = RefreshToken(
@@ -140,7 +140,7 @@ class TokenRepository:
         """
         result = await self.db.execute(
             delete(RefreshToken)
-            .where(RefreshToken.expires_at < datetime.utcnow())
+            .where(RefreshToken.expires_at < datetime.now(timezone.utc))
         )
         
         return result.rowcount

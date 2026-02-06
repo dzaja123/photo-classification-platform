@@ -28,7 +28,6 @@ export default function AuditLogs() {
       if (filters.user_id) params.user_id = filters.user_id;
 
       const response = await adminAPI.getAuditLogs(params);
-      console.log('Audit logs response:', response.data);
       setLogs(response.data.logs || []);
       setTotal(response.data.total || 0);
     } catch (error) {

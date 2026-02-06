@@ -1,6 +1,6 @@
 """Authentication service with business logic."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 from uuid import UUID
 
@@ -143,7 +143,7 @@ class AuthService:
         )
         
         # Store refresh token in database
-        expires_at = datetime.utcnow() + timedelta(days=settings.refresh_token_expire_days)
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
         await self.token_repo.create(
             user_id=user.id,
             token=refresh_token,
@@ -261,7 +261,7 @@ class AuthService:
         )
         
         # Store refresh token in database
-        expires_at = datetime.utcnow() + timedelta(days=settings.refresh_token_expire_days)
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
         await self.token_repo.create(
             user_id=user.id,
             token=refresh_token,
@@ -370,7 +370,7 @@ class AuthService:
         )
         
         # Store new refresh token
-        expires_at = datetime.utcnow() + timedelta(days=settings.refresh_token_expire_days)
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
         await self.token_repo.create(
             user_id=user.id,
             token=new_refresh_token,
@@ -435,7 +435,7 @@ class AuthService:
         if access_jti:
             access_exp = get_token_expiration(access_token)
             if access_exp:
-                ttl = int((access_exp - datetime.utcnow()).total_seconds())
+                ttl = int((access_exp - datetime.now(timezone.utc)).total_seconds())
                 if ttl > 0:
                     await blacklist_token(access_jti, ttl)
         
@@ -448,7 +448,7 @@ class AuthService:
             if refresh_jti:
                 refresh_exp = get_token_expiration(refresh_token)
                 if refresh_exp:
-                    ttl = int((refresh_exp - datetime.utcnow()).total_seconds())
+                    ttl = int((refresh_exp - datetime.now(timezone.utc)).total_seconds())
                     if ttl > 0:
                         await blacklist_token(refresh_jti, ttl)
         

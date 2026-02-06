@@ -29,6 +29,7 @@ class Submission(Base):
     gender: Mapped[str] = mapped_column(String(50), nullable=False)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
     country: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Photo information
     photo_filename: Mapped[str] = mapped_column(String(500), nullable=False)

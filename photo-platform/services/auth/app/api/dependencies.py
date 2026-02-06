@@ -15,7 +15,7 @@ from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
 from shared.enums import UserRole
-from shared.audit_logger import AuditLogger
+from shared.audit_logger import AuditLogger, get_audit_logger_singleton
 
 
 settings = get_settings()
@@ -24,12 +24,12 @@ security = HTTPBearer()
 
 async def get_audit_logger() -> AuditLogger:
     """
-    Get audit logger instance.
+    Get audit logger instance (singleton).
     
     Returns:
         AuditLogger instance
     """
-    return AuditLogger(settings.mongodb_url)
+    return get_audit_logger_singleton(settings.mongodb_url)
 
 
 async def get_auth_service(

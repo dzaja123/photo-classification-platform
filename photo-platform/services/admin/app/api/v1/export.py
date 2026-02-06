@@ -3,13 +3,14 @@
 import csv
 import json
 from io import StringIO
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+from app.api.dependencies import get_current_admin
 from app.core.database import get_db
 from app.models.submission import Submission
 from app.api.v1.submissions import build_filters_query
@@ -34,7 +35,8 @@ async def export_submissions_csv(
     date_to: Optional[datetime] = Query(None),
     search: Optional[str] = Query(None),
     limit: int = Query(1000, ge=1, le=10000, description="Maximum records to export"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(get_current_admin),
 ):
     """
     Export submissions to CSV format.
@@ -82,6 +84,7 @@ async def export_submissions_csv(
         'Gender',
         'Location',
         'Country',
+        'Description',
         'Photo Filename',
         'Photo Size (bytes)',
         'Classification Status',
@@ -108,6 +111,7 @@ async def export_submissions_csv(
             sub.gender,
             sub.location,
             sub.country,
+            sub.description or '',
             sub.photo_filename,
             sub.photo_size,
             sub.classification_status,
@@ -119,7 +123,7 @@ async def export_submissions_csv(
     
     # Return CSV file
     csv_content = output.getvalue()
-    filename = f"submissions_export_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+    filename = f"submissions_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
     
     return Response(
         content=csv_content,
@@ -144,7 +148,8 @@ async def export_submissions_json(
     date_to: Optional[datetime] = Query(None),
     search: Optional[str] = Query(None),
     limit: int = Query(1000, ge=1, le=10000, description="Maximum records to export"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(get_current_admin),
 ):
     """
     Export submissions to JSON format.
@@ -190,6 +195,7 @@ async def export_submissions_json(
             "gender": sub.gender,
             "location": sub.location,
             "country": sub.country,
+            "description": sub.description,
             "photo_filename": sub.photo_filename,
             "photo_path": sub.photo_path,
             "photo_size": sub.photo_size,
@@ -204,7 +210,7 @@ async def export_submissions_json(
     
     # Create JSON
     json_content = json.dumps({
-        "export_date": datetime.utcnow().isoformat(),
+        "export_date": datetime.now(timezone.utc).isoformat(),
         "total_records": len(data),
         "filters_applied": {
             "age_min": age_min,
@@ -221,7 +227,7 @@ async def export_submissions_json(
         "submissions": data
     }, indent=2)
     
-    filename = f"submissions_export_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+    filename = f"submissions_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
     
     return Response(
         content=json_content,

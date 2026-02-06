@@ -3,7 +3,7 @@
 import hashlib
 import secrets
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 
@@ -28,7 +28,7 @@ def generate_secure_filename(original_filename: str) -> str:
     random_str = ''.join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(12))
     
     # Add timestamp
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     
     return f"{timestamp}_{random_str}.{extension}"
 

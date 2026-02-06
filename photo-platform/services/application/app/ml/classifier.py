@@ -1,9 +1,12 @@
 """Image classifier using real ML model (ResNet50 via Keras)."""
 
+import logging
 import numpy as np
 from typing import List, Dict
 from io import BytesIO
 from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 
 class ImageClassifier:
@@ -24,17 +27,17 @@ class ImageClassifier:
             # Try to import TensorFlow/Keras
             from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
             
-            print("Loading ResNet50 model...")
+            logger.info("Loading ResNet50 model")
             self.model = ResNet50(weights='imagenet')
             self.preprocess_input = preprocess_input
             self.decode_predictions = decode_predictions
-            print("ResNet50 model loaded successfully")
+            logger.info("ResNet50 model loaded")
             
         except ImportError:
-            print("TensorFlow not available, using fallback classifier")
+            logger.warning("TensorFlow not available, using fallback classifier")
             self.model = None
         except Exception as e:
-            print(f"Error loading model: {e}, using fallback classifier")
+            logger.warning("Error loading model: %s, using fallback classifier", e)
             self.model = None
     
     def classify(self, image_bytes: bytes) -> List[Dict[str, any]]:

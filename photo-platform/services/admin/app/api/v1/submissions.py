@@ -1,14 +1,16 @@
 """Admin submissions endpoints with filtering."""
 
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+import sqlalchemy as sa
 from sqlalchemy import select, func, and_, or_, desc, asc, case
 from sqlalchemy.sql import Select
 
+from app.api.dependencies import get_current_admin
 from app.core.database import get_db
 from app.models.submission import Submission
 from app.schemas.submission import SubmissionResponse, SubmissionListResponse
@@ -50,7 +52,7 @@ def build_filters_query(
     Returns:
         Filtered query
     """
-    conditions = [Submission.is_deleted == False]
+    conditions = [Submission.is_deleted.is_(False)]
     
     # Age filters
     if age_min is not None:
@@ -135,7 +137,8 @@ async def list_submissions(
     sort_by: str = Query("created_at", description="Sort by field"),
     sort_order: str = Query("desc", description="Sort order (asc/desc)"),
     
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(get_current_admin),
 ):
     """
     List all submissions with advanced filtering.
@@ -245,7 +248,8 @@ async def list_submissions(
 @router.get("/submissions/{submission_id}", response_model=SubmissionResponse)
 async def get_submission(
     submission_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(get_current_admin),
 ):
     """
     Get a specific submission by ID.
@@ -255,7 +259,7 @@ async def get_submission(
     result = await db.execute(
         select(Submission).where(
             Submission.id == submission_id,
-            Submission.is_deleted == False
+            Submission.is_deleted.is_(False)
         )
     )
     submission = result.scalar_one_or_none()
@@ -267,7 +271,10 @@ async def get_submission(
 
 
 @router.get("/analytics", response_model=AnalyticsResponse)
-async def get_analytics(db: AsyncSession = Depends(get_db)):
+async def get_analytics(
+    db: AsyncSession = Depends(get_db),
+    _admin: dict = Depends(get_current_admin),
+):
     """
     Get analytics dashboard data.
     
@@ -281,20 +288,20 @@ async def get_analytics(db: AsyncSession = Depends(get_db)):
     - Average confidence
     """
     # Get current time
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = now - timedelta(days=7)
     month_start = now - timedelta(days=30)
     
     # Total submissions
     total_submissions_result = await db.execute(
-        select(func.count()).select_from(Submission).where(Submission.is_deleted == False)
+        select(func.count()).select_from(Submission).where(Submission.is_deleted.is_(False))
     )
     total_submissions = total_submissions_result.scalar()
     
     # Total unique users
     total_users_result = await db.execute(
-        select(func.count(func.distinct(Submission.user_id))).select_from(Submission).where(Submission.is_deleted == False)
+        select(func.count(func.distinct(Submission.user_id))).select_from(Submission).where(Submission.is_deleted.is_(False))
     )
     total_users = total_users_result.scalar()
     
@@ -302,7 +309,7 @@ async def get_analytics(db: AsyncSession = Depends(get_db)):
     submissions_today_result = await db.execute(
         select(func.count()).select_from(Submission).where(
             and_(
-                Submission.is_deleted == False,
+                Submission.is_deleted.is_(False),
                 Submission.created_at >= today_start
             )
         )
@@ -313,7 +320,7 @@ async def get_analytics(db: AsyncSession = Depends(get_db)):
     submissions_week_result = await db.execute(
         select(func.count()).select_from(Submission).where(
             and_(
-                Submission.is_deleted == False,
+                Submission.is_deleted.is_(False),
                 Submission.created_at >= week_start
             )
         )
@@ -324,7 +331,7 @@ async def get_analytics(db: AsyncSession = Depends(get_db)):
     submissions_month_result = await db.execute(
         select(func.count()).select_from(Submission).where(
             and_(
-                Submission.is_deleted == False,
+                Submission.is_deleted.is_(False),
                 Submission.created_at >= month_start
             )
         )
@@ -334,7 +341,7 @@ async def get_analytics(db: AsyncSession = Depends(get_db)):
     # By gender
     by_gender_result = await db.execute(
         select(Submission.gender, func.count()).where(
-            Submission.is_deleted == False
+            Submission.is_deleted.is_(False)
         ).group_by(Submission.gender)
     )
     by_gender = {row[0]: row[1] for row in by_gender_result}
@@ -342,7 +349,7 @@ async def get_analytics(db: AsyncSession = Depends(get_db)):
     # By country (top 10)
     by_country_result = await db.execute(
         select(Submission.country, func.count()).where(
-            Submission.is_deleted == False
+            Submission.is_deleted.is_(False)
         ).group_by(Submission.country).order_by(desc(func.count())).limit(10)
     )
     by_country = {row[0]: row[1] for row in by_country_result}
@@ -350,39 +357,87 @@ async def get_analytics(db: AsyncSession = Depends(get_db)):
     # By classification status
     by_status_result = await db.execute(
         select(Submission.classification_status, func.count()).where(
-            Submission.is_deleted == False
+            Submission.is_deleted.is_(False)
         ).group_by(Submission.classification_status)
     )
     by_status = {row[0]: row[1] for row in by_status_result}
     
-    # By classification result (top 10) - extract from JSON
-    # For now, return empty dict (would need JSON aggregation)
+    # By classification result (top 10) — extract top-1 class from JSONB
     by_classification = {}
+    try:
+        top_class_expr = func.jsonb_array_element(
+            Submission.classification_results, 0
+        ).op("->>")("class")
+        by_class_result = await db.execute(
+            select(
+                top_class_expr.label("top_class"),
+                func.count().label("cnt"),
+            )
+            .where(
+                and_(
+                    Submission.is_deleted.is_(False),
+                    Submission.classification_results.isnot(None),
+                )
+            )
+            .group_by(top_class_expr)
+            .order_by(desc("cnt"))
+            .limit(10)
+        )
+        by_classification = {row[0]: row[1] for row in by_class_result if row[0]}
+    except Exception:
+        await db.rollback()
+        by_classification = {}
     
     # Age distribution
-    age_distribution_result = await db.execute(
-        select(
-            case(
-                (Submission.age < 18, "Under 18"),
-                (Submission.age <= 25, "18-25"),
-                (Submission.age <= 35, "26-35"),
-                (Submission.age <= 45, "36-45"),
-                (Submission.age <= 55, "46-55"),
-                (Submission.age <= 65, "56-65"),
-                else_="65+"
-            ).label("age_range"),
-            func.count().label("count")
-        ).where(
-            Submission.is_deleted == False
-        ).group_by("age_range")
-    )
-    age_distribution = [
-        AgeDistribution(range=row[0], count=row[1])
-        for row in age_distribution_result
-    ]
+    age_distribution = []
+    try:
+        age_distribution_result = await db.execute(
+            select(
+                case(
+                    (Submission.age < 18, "Under 18"),
+                    (Submission.age <= 25, "18-25"),
+                    (Submission.age <= 35, "26-35"),
+                    (Submission.age <= 45, "36-45"),
+                    (Submission.age <= 55, "46-55"),
+                    (Submission.age <= 65, "56-65"),
+                    else_="65+"
+                ).label("age_range"),
+                func.count().label("count")
+            ).where(
+                Submission.is_deleted.is_(False)
+            ).group_by(sa.text("age_range"))
+        )
+        age_distribution = [
+            AgeDistribution(range=row[0], count=row[1])
+            for row in age_distribution_result
+        ]
+    except Exception:
+        await db.rollback()
+        age_distribution = []
     
-    # Average confidence (mock for now)
-    avg_confidence = 0.85
+    # Average confidence from top-1 prediction
+    avg_confidence = 0.0
+    try:
+        conf_expr = func.cast(
+            func.jsonb_array_element(
+                Submission.classification_results, 0
+            ).op("->>")("confidence"),
+            sa.Float,
+        )
+        avg_conf_result = await db.execute(
+            select(func.avg(conf_expr)).where(
+                and_(
+                    Submission.is_deleted.is_(False),
+                    Submission.classification_results.isnot(None),
+                )
+            )
+        )
+        val = avg_conf_result.scalar()
+        if val is not None:
+            avg_confidence = round(float(val), 4)
+    except Exception:
+        await db.rollback()
+        avg_confidence = 0.0
     
     return AnalyticsResponse(
         total_submissions=total_submissions,

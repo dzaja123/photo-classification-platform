@@ -184,28 +184,3 @@ async def logout(
     )
 
 
-@router.get(
-    "/me",
-    response_model=APIResponse[UserResponse],
-    summary="Get current user",
-    description="Get authenticated user's profile"
-)
-async def get_me(
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Get current user profile.
-    
-    **Requires:**
-    - Valid access token
-    
-    **Returns:**
-    - User profile information
-    """
-    user_response = UserResponse.model_validate(current_user)
-    
-    return APIResponse(
-        success=True,
-        message="User profile retrieved",
-        data=user_response
-    )

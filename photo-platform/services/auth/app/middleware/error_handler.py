@@ -110,9 +110,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
     Returns:
         JSON response with error message
     """
-    # Log the exception (in production, use proper logging)
-    print(f"Unhandled exception: {type(exc).__name__}: {str(exc)}")
-    
+
     error_response = ErrorResponse(
         success=False,
         message="An unexpected error occurred",

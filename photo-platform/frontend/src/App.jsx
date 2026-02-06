@@ -7,7 +7,6 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Dashboard from './pages/user/Dashboard';
 import Upload from './pages/user/Upload';
-import AdminDashboard from './pages/admin/Dashboard';
 import AdminSubmissions from './pages/admin/Submissions';
 import AdminAnalytics from './pages/admin/Analytics';
 import AdminAuditLogs from './pages/admin/AuditLogs';
@@ -71,11 +70,7 @@ function AppRoutes() {
       {/* Admin Routes */}
       <Route
         path="/admin"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/admin/submissions" />}
       />
       <Route
         path="/admin/submissions"

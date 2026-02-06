@@ -24,15 +24,14 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const response = await authAPI.getMe();
-        console.log('User data from API:', response.data);
-        // Extract user from nested response structure
-        const userData = response.data.data || response.data;
-        console.log('Extracted user data:', userData);
+        // Backend returns: { success, message, data: { id, email, username, role, ... } }
+        const userData = response.data?.data || response.data;
         setUser(userData);
       } catch (error) {
         console.error('Auth check failed:', error);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        setUser(null);
       }
     }
     setLoading(false);
@@ -40,20 +39,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     const response = await authAPI.login({ username, password });
-    const tokens = response.data.data || response.data;
-    const { access_token, refresh_token } = tokens;
-    localStorage.setItem('access_token', access_token);
-    localStorage.setItem('refresh_token', refresh_token);
+    // Backend returns: { success, message, data: { access_token, refresh_token, ... } }
+    const tokens = response.data?.data || response.data;
+    localStorage.setItem('access_token', tokens.access_token);
+    localStorage.setItem('refresh_token', tokens.refresh_token);
     await checkAuth();
     return response.data;
   };
 
   const register = async (data) => {
     const response = await authAPI.register(data);
-    const tokens = response.data.data || response.data;
-    const { access_token, refresh_token } = tokens;
-    localStorage.setItem('access_token', access_token);
-    localStorage.setItem('refresh_token', refresh_token);
+    // Backend returns: { success, message, data: { user, access_token, refresh_token, ... } }
+    const payload = response.data?.data || response.data;
+    localStorage.setItem('access_token', payload.access_token);
+    localStorage.setItem('refresh_token', payload.refresh_token);
     await checkAuth();
     return response.data;
   };
@@ -62,15 +61,16 @@ export const AuthProvider = ({ children }) => {
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      // Logout should always succeed client-side even if server call fails
+      console.error('Logout API error (ignored):', error);
     }
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setUser(null);
   };
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'admin';
-  console.log('Auth state:', { user, isAuthenticated: !!user, isAdmin, role: user?.role });
+  // Backend UserResponse.role is the enum value string: "USER" or "ADMIN"
+  const isAdmin = user?.role === 'ADMIN';
 
   const value = {
     user,

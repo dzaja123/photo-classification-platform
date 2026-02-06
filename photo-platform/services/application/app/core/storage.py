@@ -1,13 +1,15 @@
 """MinIO storage integration for photo uploads."""
 
-import io
-from typing import BinaryIO, Optional
+import logging
+from typing import BinaryIO
 from datetime import timedelta
 
 from minio import Minio
 from minio.error import S3Error
 
 from app.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 
 settings = get_settings()
@@ -36,9 +38,9 @@ class StorageClient:
         try:
             if not self.client.bucket_exists(self.bucket_name):
                 self.client.make_bucket(self.bucket_name)
-                print(f"Created MinIO bucket: {self.bucket_name}")
+                logger.info("Created MinIO bucket: %s", self.bucket_name)
         except S3Error as e:
-            print(f"Error creating bucket: {e}")
+            logger.error("Error creating bucket: %s", e)
             raise
     
     def upload_file(
@@ -80,7 +82,7 @@ class StorageClient:
             )
             return object_name
         except S3Error as e:
-            print(f"Error uploading file: {e}")
+            logger.error("Error uploading file: %s", e)
             raise
     
     def download_file(self, object_name: str) -> bytes:
@@ -110,7 +112,7 @@ class StorageClient:
             response.release_conn()
             return data
         except S3Error as e:
-            print(f"Error downloading file: {e}")
+            logger.error("Error downloading file: %s", e)
             raise
     
     def delete_file(self, object_name: str) -> bool:
@@ -138,7 +140,7 @@ class StorageClient:
             )
             return True
         except S3Error as e:
-            print(f"Error deleting file: {e}")
+            logger.error("Error deleting file: %s", e)
             raise
     
     def get_presigned_url(
@@ -168,7 +170,7 @@ class StorageClient:
             )
             return url
         except S3Error as e:
-            print(f"Error generating presigned URL: {e}")
+            logger.error("Error generating presigned URL: %s", e)
             raise
     
     def file_exists(self, object_name: str) -> bool:
@@ -191,11 +193,17 @@ class StorageClient:
             return False
 
 
+_storage_instance: StorageClient = None
+
+
 def get_storage_client() -> StorageClient:
     """
-    Get storage client instance.
-    
+    Get singleton storage client instance.
+
     Returns:
         StorageClient instance
     """
-    return StorageClient()
+    global _storage_instance
+    if _storage_instance is None:
+        _storage_instance = StorageClient()
+    return _storage_instance

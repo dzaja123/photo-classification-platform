@@ -1,6 +1,6 @@
 """Shared audit logging utility for MongoDB."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from shared.enums import AuditEventType, AuditEventStatus
@@ -70,7 +70,7 @@ class AuditLogger:
             ... )
         """
         log_entry = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "event_type": event_type.value,
             "user_id": user_id,
             "username": username,
@@ -131,3 +131,25 @@ class AuditLogger:
     async def close(self):
         """Close MongoDB connection."""
         self.client.close()
+
+
+_audit_logger_instance: AuditLogger = None
+
+
+def get_audit_logger_singleton(mongodb_uri: str, database_name: str = "photo_platform") -> AuditLogger:
+    """
+    Get singleton AuditLogger instance.
+
+    Reuses the same MongoDB connection across requests.
+
+    Args:
+        mongodb_uri: MongoDB connection string
+        database_name: Database name
+
+    Returns:
+        Shared AuditLogger instance
+    """
+    global _audit_logger_instance
+    if _audit_logger_instance is None:
+        _audit_logger_instance = AuditLogger(mongodb_uri, database_name)
+    return _audit_logger_instance

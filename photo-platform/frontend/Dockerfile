@@ -1,20 +1,23 @@
-# Development Dockerfile for Frontend
-FROM node:18-alpine
+# ---------- builder ----------
+FROM node:18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
 COPY frontend/package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy application files
 COPY frontend/ ./
+RUN npm run build
 
-# Expose port
+# ---------- production ----------
+FROM nginx:alpine AS production
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY infrastructure/docker/nginx/frontend.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 3000
 
-# Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD wget -qO- http://localhost:3000/ || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

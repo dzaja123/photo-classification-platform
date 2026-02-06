@@ -1,10 +1,8 @@
 # Photo Classification Platform
 
-**WorkNomads R&D Assessment**
-
 A cloud-deployable, microservices-based platform for photo classification with user management and admin analytics.
 
-## 🏗️ Architecture
+## Architecture
 
 ### Microservices (3 Services)
 1. **Auth Service** (Port 8001) - User authentication, JWT, profile management
@@ -15,13 +13,13 @@ A cloud-deployable, microservices-based platform for photo classification with u
 - **Backend**: FastAPI, Python 3.11
 - **Databases**: PostgreSQL 16, MongoDB 7, Redis 7.2
 - **Storage**: MinIO (S3-compatible)
-- **ML**: TensorFlow Lite (MobileNetV2)
+- **ML**: ResNet50 (Keras) with fallback heuristic classifier
 - **Frontend**: React 18 + Vite 5
 - **Gateway**: Nginx
 - **Infrastructure**: Docker, Kubernetes
 - **CI/CD**: GitHub Actions
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.11+
@@ -86,7 +84,7 @@ docker-compose logs -f
 docker-compose down
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Auth Service (Port 8001)
 - `POST /api/v1/auth/register` - User registration
@@ -97,20 +95,25 @@ docker-compose down
 - `GET /health` - Health check
 
 ### Application Service (Port 8002)
-- `POST /api/v1/app/upload` - Upload photo with metadata
-- `GET /api/v1/app/submissions` - List user submissions
-- `GET /api/v1/app/submissions/{id}` - Get submission details
-- `DELETE /api/v1/app/submissions/{id}` - Delete submission
+- `POST /api/v1/submissions/upload` - Upload photo with metadata (auth required)
+- `GET /api/v1/submissions/` - List user submissions (auth required)
+- `GET /api/v1/submissions/{id}` - Get submission details (auth required)
+- `DELETE /api/v1/submissions/{id}` - Delete submission (auth required)
 - `GET /health` - Health check
 
 ### Admin Service (Port 8003)
+All endpoints require admin role.
 - `GET /api/v1/admin/submissions` - List all submissions (filtered)
+- `GET /api/v1/admin/submissions/{id}` - Get submission by ID
 - `GET /api/v1/admin/analytics` - Get analytics data
 - `GET /api/v1/admin/audit-logs` - View audit logs
-- `GET /api/v1/admin/export` - Export data (CSV/JSON)
+- `GET /api/v1/admin/audit-logs/user/{id}` - User activity timeline
+- `GET /api/v1/admin/audit-logs/security` - Security events
+- `GET /api/v1/admin/export/submissions/csv` - Export CSV
+- `GET /api/v1/admin/export/submissions/json` - Export JSON
 - `GET /health` - Health check
 
-## 🔐 Security Features
+## Security Features
 
 1. **Authentication**: JWT with short-lived access tokens (15min) and refresh tokens (7 days)
 2. **Rate Limiting**: Redis-based rate limiting on all endpoints
@@ -120,7 +123,7 @@ docker-compose down
 6. **CORS**: Configured for specific origins only
 7. **Docker Security**: Non-root users, multi-stage builds, health checks
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run tests for Auth Service
@@ -140,9 +143,9 @@ cd frontend
 npm test
 ```
 
-## 📦 Deployment
+## Deployment
 
-### Railway (Recommended for Assessment)
+### Railway
 
 ```bash
 # Install Railway CLI
@@ -168,46 +171,26 @@ kubectl get services -n photo-platform
 kubectl logs -f deployment/auth-service -n photo-platform
 ```
 
-## 📚 Documentation
+## Documentation
 
 - [API Documentation](docs/API.md) - Complete API reference
 - [Architecture](docs/ARCHITECTURE.md) - System architecture and design
 - [Security](docs/SECURITY.md) - Security implementation details
 - [Deployment](docs/DEPLOYMENT.md) - Deployment guide
 
-## 🎯 Features
+## Features
 
 ### User Features
-- ✅ User registration with email validation
-- ✅ Secure login with JWT
-- ✅ Photo upload with metadata (name, age, location, gender, country, description)
-- ✅ Real-time ML classification (TensorFlow Lite MobileNetV2)
-- ✅ View submission history
-- ✅ View classification results
+- User registration with email validation
+- Secure login with JWT
+- Photo upload with metadata (name, age, location, gender, country, description)
+- Real-time ML classification (ResNet50 via Keras)
+- View submission history and classification results
 
 ### Admin Features
-- ✅ Admin-only access with RBAC
-- ✅ Advanced filtering (age, gender, location, country, date)
-- ✅ Full-text search
-- ✅ Analytics dashboard
-- ✅ Audit log viewer
-- ✅ Data export (CSV/JSON)
-- ✅ User activity timeline
-- ✅ Security event monitoring
-
-## 🏆 Project Highlights
-
-- **Real ML Model**: TensorFlow Lite MobileNetV2 (not mock classification)
-- **Production Patterns**: Repository pattern, Service layer, Dependency Injection
-- **Comprehensive Security**: 5-layer security architecture
-- **NoSQL Audit Logs**: MongoDB for flexible audit trail
-- **Complete CI/CD**: GitHub Actions with linting, testing, building
-- **Cloud-Ready**: Kubernetes manifests with scaling strategy
-
-## 📄 License
-
-This project is created for WorkNomads R&D Assessment.
-
-## 👤 Author
-
-Created by [Your Name] - 2026-02-05
+- Admin-only access with role-based access control
+- Advanced filtering (age, gender, location, country, date range)
+- Full-text search across submissions
+- Analytics dashboard with aggregated statistics
+- Audit log viewer with security event monitoring
+- Data export (CSV/JSON)

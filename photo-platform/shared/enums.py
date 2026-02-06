@@ -5,8 +5,8 @@ from enum import Enum
 
 class UserRole(str, Enum):
     """User role enumeration."""
-    USER = "user"
-    ADMIN = "admin"
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 
 class Gender(str, Enum):

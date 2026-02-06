@@ -24,8 +24,13 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const response = await authAPI.getMe();
-        setUser(response.data);
+        console.log('User data from API:', response.data);
+        // Extract user from nested response structure
+        const userData = response.data.data || response.data;
+        console.log('Extracted user data:', userData);
+        setUser(userData);
       } catch (error) {
+        console.error('Auth check failed:', error);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
       }
@@ -64,6 +69,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'admin';
+  console.log('Auth state:', { user, isAuthenticated: !!user, isAdmin, role: user?.role });
+
   const value = {
     user,
     loading,
@@ -71,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

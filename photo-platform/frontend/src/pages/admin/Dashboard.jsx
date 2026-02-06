@@ -19,10 +19,10 @@ export default function AdminDashboard() {
             <p className="text-gray-600">View statistics and charts</p>
           </Link>
 
-          <div className="card">
+          <Link to="/admin/audit-logs" className="card hover:shadow-lg transition-shadow cursor-pointer">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Audit Logs</h3>
             <p className="text-gray-600">View system activity</p>
-          </div>
+          </Link>
         </div>
       </div>
     </Layout>

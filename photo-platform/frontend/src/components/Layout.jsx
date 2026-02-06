@@ -45,10 +45,22 @@ export default function Layout({ children }) {
                       Admin
                     </Link>
                     <Link
+                      to="/admin/submissions"
+                      className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Submissions
+                    </Link>
+                    <Link
                       to="/admin/analytics"
                       className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                     >
                       Analytics
+                    </Link>
+                    <Link
+                      to="/admin/audit-logs"
+                      className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Audit Logs
                     </Link>
                   </>
                 )}

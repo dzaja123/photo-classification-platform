@@ -10,6 +10,7 @@ import Upload from './pages/user/Upload';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminSubmissions from './pages/admin/Submissions';
 import AdminAnalytics from './pages/admin/Analytics';
+import AdminAuditLogs from './pages/admin/AuditLogs';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -89,6 +90,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute adminOnly>
             <AdminAnalytics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/audit-logs"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminAuditLogs />
           </ProtectedRoute>
         }
       />

@@ -181,12 +181,12 @@ All endpoints require `ADMIN` role.
 |------|-------|-----|
 | **JWT with short-lived tokens** | Auth Service | 15-min access tokens limit exposure; refresh rotation prevents replay |
 | **Token blacklisting** | Redis | Logout immediately invalidates tokens via JTI blacklist with TTL |
-| **Rate limiting** | All services (Redis) | Per-IP counters prevent brute-force (3/min register, 5/min login, 60/min general) |
+| **Rate limiting** | Auth Service (Redis) | Per-IP counters prevent brute-force (3/min register, 5/min login) |
 | **Password strength** | Auth Service | Min 8 chars, uppercase, lowercase, digit, special char required |
 | **Input validation** | All services (Pydantic) | Type-safe schemas reject malformed input before it reaches business logic |
 | **File validation** | Application Service | MIME whitelist, extension whitelist, 10 MB size limit |
 | **RBAC** | Admin Service | `get_current_admin` dependency enforces admin role on every endpoint |
-| **Audit logging** | MongoDB | All auth events, admin actions, and security violations are logged |
+| **Audit logging** | Auth Service → MongoDB | Login, logout, registration, password changes, token refresh logged |
 | **Non-root Docker** | All Dockerfiles | Production images run as unprivileged `app` user |
 | **CORS** | All services | Explicit origin allowlist, not wildcard |
 

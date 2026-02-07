@@ -1,113 +1,84 @@
-<mxfile host="app.diagrams.net">
-  <diagram name="System Architecture" id="system-arch">
-    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.8">
+  <diagram name="System Architecture" id="jEuP-ebgzmPNOcrfLPRi">
+    <mxGraphModel dx="1426" dy="749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        
-        <!-- Title -->
-        <mxCell id="title" value="Photo Classification Platform - System Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="280" y="20" width="600" height="40" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" value="Photo Classification Platform - System Architecture" vertex="1">
+          <mxGeometry height="40" width="600" x="280" y="20" as="geometry" />
         </mxCell>
-        
-        <!-- Frontend Layer -->
-        <mxCell id="frontend-layer" value="Frontend Layer" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="80" y="100" width="200" height="100" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-2" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Frontend Layer" vertex="1">
+          <mxGeometry height="100" width="200" x="80" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="frontend-react" value="React + Vite" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="frontend-layer">
-          <mxGeometry y="30" width="200" height="30" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-3" parent="FHnvylxW98_v3TVX_GWM-2" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" value="React + Vite" vertex="1">
+          <mxGeometry height="30" width="200" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="frontend-ui" value="User Dashboard + Admin Panel" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" vertex="1" parent="frontend-layer">
-          <mxGeometry y="60" width="200" height="40" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-4" parent="FHnvylxW98_v3TVX_GWM-2" style="text;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" value="User Dashboard + Admin Panel" vertex="1">
+          <mxGeometry height="40" width="200" y="60" as="geometry" />
         </mxCell>
-        
-        <!-- API Gateway / Ingress -->
-        <mxCell id="ingress" value="NGINX Ingress Controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="320" y="120" width="200" height="60" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1" value="NGINX Ingress Controller" vertex="1">
+          <mxGeometry height="60" width="200" x="320" y="120" as="geometry" />
         </mxCell>
-        
-        <!-- Microservices Layer -->
-        <mxCell id="services-layer" value="Microservices Layer" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="80" y="260" width="760" height="180" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-6" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;" value="Microservices Layer" vertex="1">
+          <mxGeometry height="360" width="760" x="80" y="260" as="geometry" />
         </mxCell>
-        
-        <!-- Auth Service -->
-        <mxCell id="auth-service" value="Auth Service (Port 8001)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" vertex="1" parent="services-layer">
-          <mxGeometry x="20" y="50" width="220" height="110" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-7" parent="FHnvylxW98_v3TVX_GWM-6" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" value="Auth Service (Port 8001)" vertex="1">
+          <mxGeometry height="110" width="760" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="auth-features" value="• User Registration&#xa;• JWT Authentication&#xa;• Password Hashing&#xa;• Rate Limiting&#xa;• Audit Logging" style="text;html=1;align=left;verticalAlign=top;spacingLeft=5;spacingRight=4;overflow=hidden;" vertex="1" parent="auth-service">
-          <mxGeometry x="5" y="20" width="210" height="85" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-8" parent="FHnvylxW98_v3TVX_GWM-7" style="text;html=1;align=left;verticalAlign=top;spacingLeft=5;spacingRight=4;overflow=hidden;" value="• User Registration&#xa;• JWT Authentication&#xa;• Password Hashing&#xa;• Rate Limiting&#xa;• Audit Logging" vertex="1">
+          <mxGeometry height="85" width="210" x="5" y="20" as="geometry" />
         </mxCell>
-        
-        <!-- Application Service -->
-        <mxCell id="app-service" value="Application Service (Port 8002)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" vertex="1" parent="services-layer">
-          <mxGeometry x="270" y="50" width="220" height="110" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-9" parent="FHnvylxW98_v3TVX_GWM-6" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" value="Application Service (Port 8002)" vertex="1">
+          <mxGeometry height="110" width="760" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="app-features" value="• Photo Upload&#xa;• Metadata Storage&#xa;• ML Classification (ResNet50)&#xa;• Background Processing&#xa;• S3 Integration" style="text;html=1;align=left;verticalAlign=top;spacingLeft=5;spacingRight=4;overflow=hidden;" vertex="1" parent="app-service">
-          <mxGeometry x="5" y="20" width="210" height="85" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-10" parent="FHnvylxW98_v3TVX_GWM-9" style="text;html=1;align=left;verticalAlign=top;spacingLeft=5;spacingRight=4;overflow=hidden;" value="• Photo Upload&#xa;• Metadata Storage&#xa;• ML Classification (ResNet50)&#xa;• Background Processing&#xa;• S3 Integration" vertex="1">
+          <mxGeometry height="85" width="210" x="5" y="20" as="geometry" />
         </mxCell>
-        
-        <!-- Admin Service -->
-        <mxCell id="admin-service" value="Admin Service (Port 8003)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" vertex="1" parent="services-layer">
-          <mxGeometry x="520" y="50" width="220" height="110" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-11" parent="FHnvylxW98_v3TVX_GWM-6" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" value="Admin Service (Port 8003)" vertex="1">
+          <mxGeometry height="110" width="760" y="250" as="geometry" />
         </mxCell>
-        <mxCell id="admin-features" value="• Submission Filtering&#xa;• Analytics Dashboard&#xa;• Audit Log Viewer&#xa;• CSV/JSON Export&#xa;• Admin Reports" style="text;html=1;align=left;verticalAlign=top;spacingLeft=5;spacingRight=4;overflow=hidden;" vertex="1" parent="admin-service">
-          <mxGeometry x="5" y="20" width="210" height="85" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-12" parent="FHnvylxW98_v3TVX_GWM-11" style="text;html=1;align=left;verticalAlign=top;spacingLeft=5;spacingRight=4;overflow=hidden;" value="• Submission Filtering&#xa;• Analytics Dashboard&#xa;• Audit Log Viewer&#xa;• CSV/JSON Export&#xa;• Admin Reports" vertex="1">
+          <mxGeometry height="85" width="210" x="5" y="20" as="geometry" />
         </mxCell>
-        
-        <!-- Data Layer -->
-        <mxCell id="data-layer" value="Data Layer" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
-          <mxGeometry x="80" y="500" width="760" height="220" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-13" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Data Layer" vertex="1">
+          <mxGeometry height="780" width="760" x="80" y="500" as="geometry" />
         </mxCell>
-        
-        <!-- PostgreSQL -->
-        <mxCell id="postgres" value="PostgreSQL" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="data-layer">
-          <mxGeometry x="40" y="50" width="120" height="150" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-14" parent="FHnvylxW98_v3TVX_GWM-13" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" value="PostgreSQL" vertex="1">
+          <mxGeometry height="150" width="760" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="postgres-label" value="Primary Database&#xa;&#xa;• Users&#xa;• Refresh Tokens&#xa;• Submissions&#xa;&#xa;Indexed &amp; Migrated" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" vertex="1" parent="postgres">
-          <mxGeometry y="40" width="120" height="110" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-15" parent="FHnvylxW98_v3TVX_GWM-14" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" value="Primary Database&#xa;&#xa;• Users&#xa;• Refresh Tokens&#xa;• Submissions&#xa;&#xa;Indexed &amp; Migrated" vertex="1">
+          <mxGeometry height="110" width="120" y="40" as="geometry" />
         </mxCell>
-        
-        <!-- MongoDB -->
-        <mxCell id="mongodb" value="MongoDB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" vertex="1" parent="data-layer">
-          <mxGeometry x="200" y="50" width="120" height="150" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-16" parent="FHnvylxW98_v3TVX_GWM-13" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" value="MongoDB" vertex="1">
+          <mxGeometry height="150" width="760" y="180" as="geometry" />
         </mxCell>
-        <mxCell id="mongodb-label" value="Audit Logs&#xa;&#xa;• Authentication&#xa;• Admin Actions&#xa;• Security Events&#xa;&#xa;Flexible Schema" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" vertex="1" parent="mongodb">
-          <mxGeometry y="40" width="120" height="110" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-17" parent="FHnvylxW98_v3TVX_GWM-16" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" value="Audit Logs&#xa;&#xa;• Authentication&#xa;• Admin Actions&#xa;• Security Events&#xa;&#xa;Flexible Schema" vertex="1">
+          <mxGeometry height="110" width="120" y="40" as="geometry" />
         </mxCell>
-        
-        <!-- Redis -->
-        <mxCell id="redis" value="Redis" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1" vertex="1" parent="data-layer">
-          <mxGeometry x="360" y="50" width="120" height="150" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-18" parent="FHnvylxW98_v3TVX_GWM-13" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1" value="Redis" vertex="1">
+          <mxGeometry height="150" width="760" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="redis-label" value="Cache &amp; Sessions&#xa;&#xa;• Rate Limiting&#xa;• Token Blacklist&#xa;• Session Store&#xa;&#xa;In-Memory" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" vertex="1" parent="redis">
-          <mxGeometry y="40" width="120" height="110" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-19" parent="FHnvylxW98_v3TVX_GWM-18" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" value="Cache Layer&#xa;&#xa;• Rate Limiting&#xa;• Token Blacklist&#xa;&#xa;In-Memory (TTL)" vertex="1">
+          <mxGeometry height="110" width="120" y="40" as="geometry" />
         </mxCell>
-        
-        <!-- MinIO -->
-        <mxCell id="minio" value="MinIO (S3)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1" vertex="1" parent="data-layer">
-          <mxGeometry x="520" y="50" width="120" height="150" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-20" parent="FHnvylxW98_v3TVX_GWM-13" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1" value="MinIO (S3)" vertex="1">
+          <mxGeometry height="150" width="760" y="480" as="geometry" />
         </mxCell>
-        <mxCell id="minio-label" value="Object Storage&#xa;&#xa;• Photo Files&#xa;• Presigned URLs&#xa;• Bucket Policies&#xa;&#xa;S3-Compatible" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" vertex="1" parent="minio">
-          <mxGeometry y="40" width="120" height="110" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-21" parent="FHnvylxW98_v3TVX_GWM-20" style="text;html=1;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;" value="Object Storage&#xa;&#xa;• Photo Files&#xa;• Presigned URLs&#xa;• Bucket Policies&#xa;&#xa;S3-Compatible" vertex="1">
+          <mxGeometry height="110" width="120" y="40" as="geometry" />
         </mxCell>
-        
-        <!-- ML Model -->
-        <mxCell id="ml-model" value="ML Model (ResNet50)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1" vertex="1" parent="data-layer">
-          <mxGeometry x="660" y="50" width="80" height="150" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-22" parent="FHnvylxW98_v3TVX_GWM-13" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1" value="ML Model (ResNet50)" vertex="1">
+          <mxGeometry height="150" width="760" y="630" as="geometry" />
         </mxCell>
-        
-        <!-- Arrows -->
-        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="frontend-layer" target="ingress">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-23" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" target="FHnvylxW98_v3TVX_GWM-5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arrow-label1" value="HTTPS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="arrow1">
-          <mxGeometry x="-0.2" y="2" relative="1" as="geometry">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-24" connectable="0" parent="FHnvylxW98_v3TVX_GWM-23" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="HTTPS" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="2" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        
-        <mxCell id="arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="ingress" target="auth-service">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-25" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" target="FHnvylxW98_v3TVX_GWM-7">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="370" y="240" />
@@ -115,8 +86,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        
-        <mxCell id="arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="ingress" target="app-service">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-26" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" target="FHnvylxW98_v3TVX_GWM-9">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="420" y="240" />
@@ -124,8 +94,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        
-        <mxCell id="arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="ingress" target="admin-service">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-27" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" target="FHnvylxW98_v3TVX_GWM-11">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="470" y="240" />
@@ -133,55 +102,44 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        
-        <!-- Database connections -->
-        <mxCell id="db-arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="auth-service" target="postgres">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-28" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-14">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <mxCell id="db-arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="auth-service" target="mongodb">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-29" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-16">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <mxCell id="db-arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="auth-service" target="redis">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-30" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-18">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <mxCell id="db-arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="app-service" target="postgres">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-31" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-14">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <mxCell id="db-arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="app-service" target="minio">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-32" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-20">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <mxCell id="db-arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="app-service" target="ml-model">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-33" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-22">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <mxCell id="db-arrow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="admin-service" target="postgres">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-34" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-14">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <mxCell id="db-arrow8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" edge="1" parent="1" source="admin-service" target="mongodb">
+        <mxCell id="FHnvylxW98_v3TVX_GWM-35" edge="1" parent="1" source="FHnvylxW98_v3TVX_GWM-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;dashed=1;" target="FHnvylxW98_v3TVX_GWM-16">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        
-        <!-- Legend -->
-        <mxCell id="legend" value="Legend" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
-          <mxGeometry x="880" y="100" width="240" height="150" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-36" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" value="Legend" vertex="1">
+          <mxGeometry height="150" width="240" x="880" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="legend1" value="━━━  HTTPS Request" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;" vertex="1" parent="legend">
-          <mxGeometry y="30" width="240" height="30" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-37" parent="FHnvylxW98_v3TVX_GWM-36" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;" value="━━━  HTTPS Request" vertex="1">
+          <mxGeometry height="30" width="240" y="30" as="geometry" />
         </mxCell>
-        <mxCell id="legend2" value="- - -   Database Connection" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;" vertex="1" parent="legend">
-          <mxGeometry y="60" width="240" height="30" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-38" parent="FHnvylxW98_v3TVX_GWM-36" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;" value="- - -   Database Connection" vertex="1">
+          <mxGeometry height="30" width="240" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="legend3" value="Async Background Processing" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;fillColor=#f5f5f5;" vertex="1" parent="legend">
-          <mxGeometry y="90" width="240" height="30" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-39" parent="FHnvylxW98_v3TVX_GWM-36" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;fillColor=#f5f5f5;" value="Async Background Processing" vertex="1">
+          <mxGeometry height="30" width="240" y="90" as="geometry" />
         </mxCell>
-        <mxCell id="legend4" value="Auto-scaling enabled (HPA)" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;fillColor=#fff2cc;" vertex="1" parent="legend">
-          <mxGeometry y="120" width="240" height="30" as="geometry" />
+        <mxCell id="FHnvylxW98_v3TVX_GWM-40" parent="FHnvylxW98_v3TVX_GWM-36" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;spacingRight=4;overflow=hidden;fillColor=#fff2cc;" value="Auto-scaling enabled (HPA)" vertex="1">
+          <mxGeometry height="30" width="240" y="120" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

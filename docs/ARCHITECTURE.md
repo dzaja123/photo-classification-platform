@@ -11,8 +11,8 @@ The platform follows a **microservices architecture** with three backend service
 | Service | Port | Responsibility | Database Access |
 |---------|------|----------------|-----------------|
 | **Auth** | 8001 | Registration, login, JWT, profiles | PostgreSQL (users, tokens), Redis (blacklist, rate limits), MongoDB (audit) |
-| **Application** | 8002 | Photo upload, storage, ML classification | PostgreSQL (submissions), MinIO (photos), Redis (rate limits), MongoDB (audit) |
-| **Admin** | 8003 | Filtering, analytics, audit logs, export | PostgreSQL (submissions, read-only), MongoDB (audit logs), Redis (rate limits) |
+| **Application** | 8002 | Photo upload, storage, ML classification | PostgreSQL (submissions), MinIO (photos) |
+| **Admin** | 8003 | Filtering, analytics, audit logs, export | PostgreSQL (submissions, read-only), MongoDB (audit logs) |
 | **Frontend** | 3000 | React SPA via Nginx | — |
 
 ## Data Flow

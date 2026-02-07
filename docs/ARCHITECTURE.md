@@ -2,104 +2,74 @@
 
 ## System Overview
 
-The Photo Classification Platform follows a **microservices architecture** with three backend services, a React frontend, and shared infrastructure.
+The platform follows a **microservices architecture** with three backend services, a React frontend, and shared infrastructure.
 
-```
-┌─────────────┐
-│  Frontend   │  React 18 + Vite 5 + TailwindCSS
-│ (port 3000) │
-└──────┬──────┘
-       │
-┌──────▼───────┐
-│    Nginx     │  API Gateway / Reverse Proxy
-│  (port 80)   │
-└──┬───┬───┬───┘
-   │   │   │
-┌──▼┐ ┌▼──┐ ┌▼──┐
-│Auth││App│ │Adm│  FastAPI Microservices
-│8001││8002││8003│
-└─┬──┘└┬──┘ └┬──┘
-  │     │     │
-┌─▼─────▼─────▼─┐
-│  PostgreSQL 16 │  Users, Submissions
-│  (port 5432)   │
-└────────────────┘
-┌────────────────┐
-│   Redis 7.2    │  Caching, Rate Limiting, Token Blacklist
-│  (port 6379)   │
-└────────────────┘
-┌────────────────┐
-│  MongoDB 7     │  Audit Logs
-│  (port 27017)  │
-└────────────────┘
-┌────────────────┐
-│  MinIO         │  Photo Object Storage (S3-compatible)
-│  (port 9000)   │
-└────────────────┘
-```
+![System Architecture](../diagrams/system-architecture.png)
 
 ## Microservices
 
-### Auth Service (port 8001)
-- User registration and login
-- JWT access/refresh token management
-- Password hashing (bcrypt + SHA256 pre-hash)
-- Rate limiting (Redis-backed)
-- Audit logging to MongoDB
+| Service | Port | Responsibility | Database Access |
+|---------|------|----------------|-----------------|
+| **Auth** | 8001 | Registration, login, JWT, profiles | PostgreSQL (users, tokens), Redis (blacklist, rate limits), MongoDB (audit) |
+| **Application** | 8002 | Photo upload, storage, ML classification | PostgreSQL (submissions), MinIO (photos), Redis (rate limits), MongoDB (audit) |
+| **Admin** | 8003 | Filtering, analytics, audit logs, export | PostgreSQL (submissions, read-only), MongoDB (audit logs), Redis (rate limits) |
+| **Frontend** | 3000 | React SPA via Nginx | — |
 
-### Application Service (port 8002)
-- Photo upload with validation
-- MinIO object storage integration
-- Background ML classification (ResNet50 / fallback heuristics)
-- User-scoped submission CRUD
+## Data Flow
 
-### Admin Service (port 8003)
-- Admin-only endpoints (JWT role enforcement)
-- Advanced filtering and search
-- Analytics dashboard (aggregated statistics)
-- Audit log viewer
-- Data export (CSV / JSON)
+![Data Flow](../diagrams/data-flow.png)
+
+1. User registers/logs in via Auth Service → receives JWT
+2. User uploads photo + metadata via Application Service → stored in PostgreSQL + MinIO
+3. Background task classifies photo (ResNet50) → results saved to submission record
+4. Admin queries submissions via Admin Service → filters, exports, views audit logs
 
 ## Design Patterns
 
 | Pattern | Usage |
 |---------|-------|
-| Repository | Data access layer in auth and application services |
-| Service Layer | Business logic separated from route handlers |
-| Dependency Injection | FastAPI `Depends()` for DB sessions, auth, audit |
-| Singleton | StorageClient, ImageClassifier, AuditLogger |
-| Background Tasks | Async ML classification via FastAPI BackgroundTasks |
-
-## Security Layers
-
-1. **JWT Authentication** — Short-lived access tokens (15 min), refresh rotation (7 days)
-2. **Token Blacklisting** — Redis-based JTI blacklist on logout
-3. **Rate Limiting** — Per-IP Redis counters with configurable windows
-4. **Input Validation** — Pydantic schemas with password strength, reserved usernames
-5. **RBAC** — Admin role enforcement on admin endpoints
-6. **Audit Trail** — MongoDB event log for all critical actions
+| **Repository** | Data access layer (`user_repository`, `submission_repository`) |
+| **Service Layer** | Business logic separated from route handlers (`auth_service`, `submission_service`) |
+| **Dependency Injection** | FastAPI `Depends()` for DB sessions, auth, audit logger |
+| **Singleton** | `StorageClient`, `ImageClassifier`, `AuditLogger` |
+| **Background Tasks** | Async ML classification via `BackgroundTasks` |
 
 ## Database Choices
 
 | Database | Purpose | Justification |
 |----------|---------|---------------|
-| **PostgreSQL 16** | Users, submissions, refresh tokens | ACID compliance for transactional data, JSONB support for flexible classification results, mature async driver (`asyncpg`), strong indexing (B-tree, GIN for full-text search) |
-| **MongoDB 7** | Audit logs | Schema-flexible documents suit heterogeneous event types (auth, admin, security), each with different metadata shapes. TTL indexes enable automatic log rotation. Write-heavy workload benefits from MongoDB's append-optimized storage |
-| **Redis 7.2** | Rate limiting, token blacklist, caching | Sub-millisecond reads for hot-path operations (every request checks rate limits and token blacklist). TTL-based expiration aligns naturally with token lifetimes and rate-limit windows |
-| **MinIO** | Photo storage | S3-compatible API allows seamless migration to AWS S3 or GCS in production. Presigned URLs offload bandwidth from application servers |
+| **PostgreSQL 16** | Users, submissions, refresh tokens | ACID transactions, UUID PKs, JSONB for classification results, async driver (`asyncpg`), B-tree + GIN indexes |
+| **MongoDB 7** | Audit logs | Schema-flexible documents for heterogeneous event types, TTL indexes for log rotation, append-optimized writes |
+| **Redis 7.2** | Rate limiting, token blacklist | Sub-millisecond reads on every request, TTL-based expiration matches token lifetimes |
+| **MinIO** | Photo storage | S3-compatible API for seamless migration to AWS S3 or GCS in production |
 
-## Database Schema
+## Schema Design
 
 ### PostgreSQL
-- `users` — id (UUID PK), email, username, hashed_password, role, is_active, timestamps
-- `refresh_tokens` — id (UUID PK), user_id (FK), token, expires_at, revoked
-- `submissions` — id (UUID PK), user_id, personal info, photo metadata, classification results, timestamps, soft delete
+
+**`users`** — `id` (UUID PK), `email` (unique), `username` (unique), `hashed_password`, `role`, `is_active`, `created_at`, `updated_at`
+
+**`refresh_tokens`** — `id` (UUID PK), `user_id` (FK → users), `token` (unique), `expires_at`, `is_revoked`, `created_at`
+
+**`submissions`** — `id` (UUID PK), `user_id` (indexed), `name`, `age`, `gender`, `location`, `country`, `description`, `photo_filename`, `photo_path` (unique), `photo_size`, `photo_mime_type`, `classification_status` (indexed), `classification_results` (JSONB), `classification_error`, `classified_at`, `created_at` (indexed), `updated_at`, `is_deleted` (indexed)
 
 ### MongoDB
-- `audit_logs` — timestamp, event_type, user_id, action, ip_address, metadata, status
+**`audit_logs`** — `timestamp`, `event_type`, `user_id`, `action`, `ip_address`, `user_agent`, `metadata` (flexible), `status`
 
 ### Redis
 - `rate_limit:{prefix}:{path}:{ip}` — Counter with TTL
-- `blacklist:{jti}` — Token blacklist entries with TTL
+- `blacklist:{jti}` — Token blacklist entry with TTL matching token expiry
 
-> **Note on Admin Service**: The Admin Service shares the same PostgreSQL database as the Application Service (read-only access to the `submissions` table). It does not have its own Alembic migrations — schema changes are managed by the Application Service. This avoids migration conflicts and enforces a clear ownership boundary.
+### Migrations
+Alembic manages PostgreSQL schema for Auth and Application services. Admin Service shares the Application database (read-only) and has no migrations of its own.
+
+## Security Layers
+
+See [SECURITY.md](SECURITY.md) for full details.
+
+1. **JWT Authentication** — 15-min access tokens, 7-day refresh tokens with rotation
+2. **Token Blacklisting** — Redis JTI blacklist on logout
+3. **Rate Limiting** — Per-IP Redis counters (configurable per endpoint)
+4. **Input Validation** — Pydantic schemas, password strength, reserved usernames
+5. **RBAC** — Admin role enforcement via `get_current_admin` dependency
+6. **Audit Trail** — MongoDB event log for all critical actions

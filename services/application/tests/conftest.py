@@ -91,7 +91,12 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
     async def override_get_db():
         async with TestSessionLocal() as session:
-            yield session
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
 
     async def override_get_current_user_id():
         return TEST_USER_ID

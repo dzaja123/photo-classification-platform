@@ -186,8 +186,9 @@ class TestListSubmissionsEndpoint:
             "/api/v1/submissions/upload", data=test_submission_data, files=files
         )
 
-        # Filter by pending status
-        response = await client.get("/api/v1/submissions/?status=pending")
+        # The background classification task runs and changes status
+        # from "pending" to "failed" (mocked storage), so filter by "failed"
+        response = await client.get("/api/v1/submissions/?status=failed")
         assert response.status_code == 200
         data = response.json()
         assert data["total"] >= 1

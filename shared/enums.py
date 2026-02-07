@@ -17,14 +17,6 @@ class TokenType(str, Enum):
     REFRESH = "refresh"
 
 
-class Gender(str, Enum):
-    """Gender enumeration."""
-
-    MALE = "Male"
-    FEMALE = "Female"
-    OTHER = "Other"
-
-
 class SubmissionStatus(str, Enum):
     """Submission status enumeration."""
 

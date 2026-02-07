@@ -14,7 +14,7 @@ from app.core.cache import is_token_blacklisted
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
-from shared.enums import TokenType, UserRole
+from shared.enums import TokenType
 from shared.audit_logger import AuditLogger, get_audit_logger_singleton
 
 
@@ -119,52 +119,6 @@ async def get_current_user(
         )
 
     return user
-
-
-async def get_current_active_user(user: User = Depends(get_current_user)) -> User:
-    """
-    Get current active user.
-
-    Args:
-        user: Current user from token
-
-    Returns:
-        Active user
-
-    Raises:
-        HTTPException: If user is inactive
-    """
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
-        )
-    return user
-
-
-def require_role(*allowed_roles: UserRole):
-    """
-    Dependency factory for role-based access control.
-
-    Args:
-        *allowed_roles: Roles allowed to access the endpoint
-
-    Returns:
-        Dependency function
-
-    Usage:
-        @app.get("/admin")
-        async def admin_route(user: User = Depends(require_role(UserRole.ADMIN))):
-            return {"message": "Admin access granted"}
-    """
-
-    async def role_checker(user: User = Depends(get_current_user)) -> User:
-        if user.role not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions"
-            )
-        return user
-
-    return role_checker
 
 
 async def get_client_ip(

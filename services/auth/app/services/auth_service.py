@@ -18,7 +18,6 @@ from app.core.security import (
     get_token_expiration,
 )
 from app.core.cache import blacklist_token, is_token_blacklisted
-from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.repositories.token_repository import TokenRepository
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
@@ -444,18 +443,6 @@ class AuthService:
             )
 
         return True
-
-    async def get_user_by_id(self, user_id: UUID) -> Optional[User]:
-        """
-        Get user by ID.
-
-        Args:
-            user_id: User UUID
-
-        Returns:
-            User if found, None otherwise
-        """
-        return await self.user_repo.get_by_id(user_id)
 
     async def update_user(
         self, user_id: UUID, user_data: UserUpdate

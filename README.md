@@ -1,71 +1,109 @@
 # Photo Classification Platform
 
-A cloud-deployable, microservices-based platform for photo classification with user management and admin analytics.
+A cloud-deployable, microservices-based platform where users register, upload photos with metadata, and receive ML classification results. An admin panel provides filtering, search, analytics, and audit logging.
 
 ## Architecture
 
-### Microservices (3 Services)
-1. **Auth Service** (Port 8001) - User authentication, JWT, profile management
-2. **Application Service** (Port 8002) - Photo upload, storage, ML classification
-3. **Admin Service** (Port 8003) - Admin panel, filtering, analytics, audit logs
+![System Architecture](diagrams/system-architecture.png)
+
+### Microservices (3 Backend Services + Frontend)
+
+| Service | Port | Responsibility |
+|---------|------|----------------|
+| **Auth Service** | 8001 | Registration, login, JWT tokens, profile management |
+| **Application Service** | 8002 | Photo upload, MinIO storage, ML classification |
+| **Admin Service** | 8003 | Admin panel, filtering, analytics, audit logs, export |
+| **Frontend** | 3000 | React SPA served via Nginx |
+
+### Data Flow
+
+![Data Flow](diagrams/data-flow.png)
 
 ### Technology Stack
-- **Backend**: FastAPI, Python 3.11
-- **Databases**: PostgreSQL 16, MongoDB 7, Redis 7.2
-- **Storage**: MinIO (S3-compatible)
-- **ML**: ResNet50 (Keras) with fallback heuristic classifier
-- **Frontend**: React 18 + Vite 5
-- **Gateway**: Nginx
-- **Infrastructure**: Docker, Kubernetes
-- **CI/CD**: GitHub Actions
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | FastAPI, Python 3.11, async/await |
+| **Databases** | PostgreSQL 16 (users, submissions), MongoDB 7 (audit logs), Redis 7.2 (rate limiting, token blacklist) |
+| **Storage** | MinIO (S3-compatible object storage) |
+| **ML** | ResNet50 (Keras) with fallback heuristic classifier |
+| **Frontend** | React 18 + Vite 5 + TailwindCSS |
+| **Gateway** | Nginx reverse proxy |
+| **Infrastructure** | Docker, Kubernetes, GitHub Actions CI/CD |
+
+### Database Justification
+
+| Database | Purpose | Why |
+|----------|---------|-----|
+| **PostgreSQL 16** | Users, submissions, refresh tokens | ACID transactions, UUID support, JSONB for classification results, async driver (`asyncpg`), B-tree + GIN indexes |
+| **MongoDB 7** | Audit logs | Schema-flexible documents for heterogeneous event types, TTL indexes for log rotation, append-optimized writes |
+| **Redis 7.2** | Rate limiting, token blacklist | Sub-millisecond reads on every request, TTL-based expiration matches token lifetimes |
+| **MinIO** | Photo storage | S3-compatible API for seamless migration to AWS S3 or GCS in production |
 
 ## Quick Start
 
 ### Prerequisites
-- Python 3.11+
 - Docker & Docker Compose
-- Node.js 18+
 - Git
+- Python 3.11+ (for local development without Docker)
+- Node.js 18+ (for frontend development without Docker)
 
-### Development Setup
+### Docker Compose (Recommended)
 
 ```bash
-# Clone repository
 git clone <repository-url>
 cd photo-platform
 
-# Start infrastructure services
+# Start all services (backend + frontend + infrastructure)
 docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d
 
-# Set up Auth Service
+# Verify
+docker ps  # All containers should be healthy
+
+# Run database migrations
+docker exec photo-platform-auth alembic upgrade head
+docker exec photo-platform-application alembic upgrade head
+
+# Create admin user
+docker exec photo-platform-auth python scripts/create_admin.py
+```
+
+Services are now available:
+- **Frontend**: http://localhost:3000
+- **Auth API**: http://localhost:8001/docs (Swagger UI)
+- **Application API**: http://localhost:8002/docs
+- **Admin API**: http://localhost:8003/docs
+- **MinIO Console**: http://localhost:9001
+
+### Local Development (Without Docker)
+
+```bash
+# Start infrastructure only
+docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d postgres redis minio mongodb
+
+# Auth Service
 cd services/auth
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+python -m venv venv && source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your configuration
+cp .env.example .env  # Edit as needed
 alembic upgrade head
 uvicorn app.main:app --reload --port 8001
 
-# Set up Application Service
-cd ../application
-python -m venv venv
-source venv/bin/activate
+# Application Service (new terminal)
+cd services/application
 pip install -r requirements.txt
 cp .env.example .env
 alembic upgrade head
 uvicorn app.main:app --reload --port 8002
 
-# Set up Admin Service
-cd ../admin
-python -m venv venv
-source venv/bin/activate
+# Admin Service (new terminal)
+cd services/admin
 pip install -r requirements.txt
 cp .env.example .env
 uvicorn app.main:app --reload --port 8003
 
-# Set up Frontend
-cd ../../frontend
+# Frontend (new terminal)
+cd frontend
 npm install
 cp .env.example .env
 npm run dev
@@ -73,141 +111,136 @@ npm run dev
 
 ### Creating the Admin User
 
-All users register with the `USER` role by default. To create the first admin account, use the provided seed script:
+All users register with the `USER` role by default. To create the first admin:
 
 ```bash
-# Create admin with default credentials (admin_user / Admin123!@#)
+# Default credentials
 docker exec photo-platform-auth python scripts/create_admin.py
 
-# Or specify custom credentials via environment variables
+# Custom credentials
 docker exec -e ADMIN_EMAIL=admin@example.com \
             -e ADMIN_USERNAME=myadmin \
             -e ADMIN_PASSWORD='MySecure123!@#' \
             photo-platform-auth python scripts/create_admin.py
 ```
 
-Default admin credentials (change after first login):
-| Field | Value |
-|-------|-------|
+| Field | Default Value |
+|-------|---------------|
 | Email | `admin@admin.com` |
 | Username | `admin_user` |
 | Password | `Admin123!@#` |
 
-The script is idempotent — if an admin already exists it will skip creation. If the email/username is taken by a regular user, it promotes that user to admin.
-
-### Docker Compose (Full Stack)
-
-```bash
-# Start all services
-docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d
-
-# View logs
-docker-compose -f infrastructure/docker/docker-compose.dev.yml logs -f
-
-# Stop all services
-docker-compose -f infrastructure/docker/docker-compose.dev.yml down
-```
+The script is idempotent — re-running it is safe.
 
 ## API Endpoints
 
+Interactive Swagger docs available at `http://localhost:{port}/docs` when `DEBUG=true`.
+
 ### Auth Service (Port 8001)
-- `POST /api/v1/auth/register` - User registration
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Refresh token
-- `POST /api/v1/auth/logout` - Logout
-- `GET /api/v1/users/me` - Get current user
-- `GET /health` - Health check
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/register` | User registration |
+| POST | `/api/v1/auth/login` | Login (returns JWT) |
+| POST | `/api/v1/auth/refresh` | Refresh access token |
+| POST | `/api/v1/auth/logout` | Revoke tokens |
+| GET | `/api/v1/users/me` | Current user profile |
+| PUT | `/api/v1/users/me` | Update profile |
+| POST | `/api/v1/users/change-password` | Change password |
+| GET | `/health` | Health check |
 
 ### Application Service (Port 8002)
-- `POST /api/v1/submissions/upload` - Upload photo with metadata (auth required)
-- `GET /api/v1/submissions/` - List user submissions (auth required)
-- `GET /api/v1/submissions/{id}` - Get submission details (auth required)
-- `DELETE /api/v1/submissions/{id}` - Delete submission (auth required)
-- `GET /api/v1/submissions/{id}/photo` - Get photo preview (auth required)
-- `GET /health` - Health check
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/submissions/upload` | Upload photo + metadata |
+| GET | `/api/v1/submissions/` | List user submissions (paginated, filterable) |
+| GET | `/api/v1/submissions/{id}` | Get submission details |
+| DELETE | `/api/v1/submissions/{id}` | Soft-delete submission |
+| GET | `/api/v1/submissions/{id}/photo` | Serve photo (JWT via query param) |
+| GET | `/api/v1/status` | Service status |
+| GET | `/health` | Health check |
 
 ### Admin Service (Port 8003)
-All endpoints require admin role.
-- `GET /api/v1/admin/submissions` - List all submissions (filtered)
-- `GET /api/v1/admin/submissions/{id}` - Get submission by ID
-- `GET /api/v1/admin/analytics` - Get analytics data
-- `GET /api/v1/admin/audit-logs` - View audit logs
-- `GET /api/v1/admin/audit-logs/user/{id}` - User activity timeline
-- `GET /api/v1/admin/audit-logs/security` - Security events
-- `GET /api/v1/admin/export/submissions/csv` - Export CSV
-- `GET /api/v1/admin/export/submissions/json` - Export JSON
-- `GET /health` - Health check
+All endpoints require `ADMIN` role.
 
-## Security Features
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/admin/submissions` | List/filter all submissions |
+| GET | `/api/v1/admin/submissions/{id}` | Get submission by ID |
+| GET | `/api/v1/admin/analytics` | Aggregated statistics |
+| GET | `/api/v1/admin/audit-logs` | Paginated audit logs |
+| GET | `/api/v1/admin/audit-logs/user/{id}` | User activity timeline |
+| GET | `/api/v1/admin/audit-logs/security` | Security events summary |
+| GET | `/api/v1/admin/export/submissions/csv` | Export as CSV |
+| GET | `/api/v1/admin/export/submissions/json` | Export as JSON |
+| GET | `/api/v1/status` | Service status |
+| GET | `/health` | Health check |
 
-1. **Authentication**: JWT with short-lived access tokens (15min) and refresh tokens (7 days)
-2. **Rate Limiting**: Redis-based rate limiting on all endpoints
-3. **Input Validation**: Pydantic schemas with comprehensive validation
-4. **File Upload**: MIME type validation, size limits, secure filename generation
-5. **Audit Logging**: MongoDB-based audit trail for all critical actions
-6. **CORS**: Configured for specific origins only
-7. **Docker Security**: Non-root users, multi-stage builds, health checks
+## Safety Rules & Security
+
+| Rule | Where | Why |
+|------|-------|-----|
+| **JWT with short-lived tokens** | Auth Service | 15-min access tokens limit exposure; refresh rotation prevents replay |
+| **Token blacklisting** | Redis | Logout immediately invalidates tokens via JTI blacklist with TTL |
+| **Rate limiting** | All services (Redis) | Per-IP counters prevent brute-force (3/min register, 5/min login, 60/min general) |
+| **Password strength** | Auth Service | Min 8 chars, uppercase, lowercase, digit, special char required |
+| **Input validation** | All services (Pydantic) | Type-safe schemas reject malformed input before it reaches business logic |
+| **File validation** | Application Service | MIME whitelist, extension whitelist, 10 MB size limit |
+| **RBAC** | Admin Service | `get_current_admin` dependency enforces admin role on every endpoint |
+| **Audit logging** | MongoDB | All auth events, admin actions, and security violations are logged |
+| **Non-root Docker** | All Dockerfiles | Production images run as unprivileged `app` user |
+| **CORS** | All services | Explicit origin allowlist, not wildcard |
+
+See [docs/SECURITY.md](docs/SECURITY.md) for full details.
 
 ## Testing
 
-**63 tests** across 3 backend services, all run with `pytest` and `pytest-asyncio`.
-
-### Running Tests
-
 ```bash
-# Via Docker (recommended — no local setup needed)
+# Via Docker
 docker exec photo-platform-auth python -m pytest tests/ -v
 docker exec photo-platform-application python -m pytest tests/ -v
 docker exec photo-platform-admin python -m pytest tests/ -v
 
 # Via Makefile
-make test            # Run all services
-make test-auth       # Auth service only
-make test-app        # Application service only
-make test-admin      # Admin service only
-
-# Locally (requires venv + dependencies)
-cd services/auth && pytest tests/ -v --cov=app
-cd services/application && pytest tests/ -v --cov=app
-cd services/admin && pytest tests/ -v --cov=app
+make test
 ```
 
-## Deployment
+Coverage thresholds enforced per service (minimum 60%).
 
-### Kubernetes (Primary)
+## CI/CD Pipeline
+
+GitHub Actions (`.github/workflows/ci.yml`):
+
+1. **Lint** — Ruff linter + formatter per service
+2. **Test** — pytest with PostgreSQL, Redis, MongoDB service containers
+3. **Build** — Docker images pushed to GitHub Container Registry (GHCR)
+4. **Deploy** — `kubectl apply` to Kubernetes (main branch, manifests in `k8s/`)
+
+## Kubernetes Deployment
 
 ```bash
-# Apply manifests
 kubectl apply -f k8s/
-
-# Check status
 kubectl get pods -n photo-platform
-kubectl get services -n photo-platform
-
-# View logs
-kubectl logs -f deployment/auth-service -n photo-platform
 ```
+
+- HorizontalPodAutoscaler per service (min 2, max 5–15 replicas, 70% CPU target)
+- Liveness + readiness probes on `/health`
+- Secrets via `k8s/secrets.yaml`, ConfigMap via `k8s/configmap.yaml`
+- Ingress with TLS (cert-manager), path-based routing
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for scaling, secrets, and observability notes.
 
 ## Documentation
 
-- [API Documentation](docs/API.md) - Complete API reference
-- [Architecture](docs/ARCHITECTURE.md) - System architecture and design
-- [Security](docs/SECURITY.md) - Security implementation details
-- [Deployment](docs/DEPLOYMENT.md) - Deployment guide
+| Document | Contents |
+|----------|----------|
+| [API Reference](docs/API.md) | Full endpoint specs with request/response examples |
+| [Architecture](docs/ARCHITECTURE.md) | System design, database choices, design patterns |
+| [Security](docs/SECURITY.md) | Auth, RBAC, rate limiting, audit logging |
+| [Deployment](docs/DEPLOYMENT.md) | Docker, K8s, scaling, observability, env vars |
 
-## Features
+## Diagrams
 
-### User Features
-- User registration with email validation
-- Secure login with JWT
-- Photo upload with metadata (name, age, location, gender, country, description)
-- Real-time ML classification (ResNet50 via Keras)
-- View submission history and classification results
+Source files (`.drawio`) are in `diagrams/`. Exported PNGs:
 
-### Admin Features
-- Admin-only access with role-based access control
-- Advanced filtering (age, gender, location, country, date range)
-- Full-text search across submissions
-- Analytics dashboard with aggregated statistics
-- Audit log viewer with security event monitoring
-- Data export (CSV/JSON)
+- `diagrams/system-architecture.png` — Block diagram of all services, databases, and communication paths
+- `diagrams/data-flow.png` — Request flow from user upload through classification to admin view

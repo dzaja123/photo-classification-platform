@@ -30,6 +30,7 @@ docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d postgres re
 cd services/auth
 python -m venv venv && source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env  # Edit as needed
 alembic upgrade head
 uvicorn app.main:app --reload --port 8001
 
@@ -37,6 +38,7 @@ uvicorn app.main:app --reload --port 8001
 cd services/application
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
 alembic upgrade head
 uvicorn app.main:app --reload --port 8002
 
@@ -44,6 +46,7 @@ uvicorn app.main:app --reload --port 8002
 cd services/admin
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
 uvicorn app.main:app --reload --port 8003
 
 # 5. Frontend (new terminal)

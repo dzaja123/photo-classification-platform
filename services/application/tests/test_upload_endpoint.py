@@ -175,6 +175,29 @@ class TestListSubmissionsEndpoint:
         assert "page" in data
         assert "page_size" in data
 
+    @pytest.mark.asyncio
+    async def test_list_submissions_with_status_filter(
+        self, client: AsyncClient, test_image_jpg, test_submission_data
+    ):
+        """Test listing submissions with status filter."""
+        # Create a submission first
+        files = {"photo": ("test.jpg", test_image_jpg, "image/jpeg")}
+        await client.post(
+            "/api/v1/submissions/upload", data=test_submission_data, files=files
+        )
+
+        # Filter by pending status
+        response = await client.get("/api/v1/submissions/?status=pending")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] >= 1
+
+        # Filter by completed status (should be empty)
+        response = await client.get("/api/v1/submissions/?status=completed")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 0
+
 
 class TestGetSubmissionEndpoint:
     """Test get single submission endpoint."""
@@ -187,6 +210,26 @@ class TestGetSubmissionEndpoint:
 
         assert response.status_code == 404
 
+    @pytest.mark.asyncio
+    async def test_get_submission_success(
+        self, client: AsyncClient, test_image_jpg, test_submission_data
+    ):
+        """Test getting an existing submission."""
+        # Create a submission
+        files = {"photo": ("test.jpg", test_image_jpg, "image/jpeg")}
+        create_resp = await client.post(
+            "/api/v1/submissions/upload", data=test_submission_data, files=files
+        )
+        assert create_resp.status_code == 201
+        submission_id = create_resp.json()["id"]
+
+        # Get it
+        response = await client.get(f"/api/v1/submissions/{submission_id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == submission_id
+        assert data["name"] == test_submission_data["name"]
+
 
 class TestDeleteSubmissionEndpoint:
     """Test delete submission endpoint."""
@@ -198,3 +241,44 @@ class TestDeleteSubmissionEndpoint:
         response = await client.delete(f"/api/v1/submissions/{fake_uuid}")
 
         assert response.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_delete_submission_success(
+        self, client: AsyncClient, test_image_jpg, test_submission_data
+    ):
+        """Test successfully deleting a submission."""
+        # Create a submission
+        files = {"photo": ("test.jpg", test_image_jpg, "image/jpeg")}
+        create_resp = await client.post(
+            "/api/v1/submissions/upload", data=test_submission_data, files=files
+        )
+        assert create_resp.status_code == 201
+        submission_id = create_resp.json()["id"]
+
+        # Delete it
+        response = await client.delete(f"/api/v1/submissions/{submission_id}")
+        assert response.status_code == 204
+
+        # Verify it's gone
+        response = await client.get(f"/api/v1/submissions/{submission_id}")
+        assert response.status_code == 404
+
+
+class TestPhotoEndpoint:
+    """Test photo retrieval endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_get_photo_no_token(self, client: AsyncClient):
+        """Test getting photo without token."""
+        fake_uuid = "00000000-0000-0000-0000-000000000000"
+        response = await client.get(f"/api/v1/submissions/{fake_uuid}/photo")
+        assert response.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_get_photo_invalid_token(self, client: AsyncClient):
+        """Test getting photo with invalid token."""
+        fake_uuid = "00000000-0000-0000-0000-000000000000"
+        response = await client.get(
+            f"/api/v1/submissions/{fake_uuid}/photo?token=invalid-token"
+        )
+        assert response.status_code == 401

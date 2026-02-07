@@ -126,22 +126,26 @@ All endpoints require admin role.
 
 ## Testing
 
+**63 tests** across 3 backend services, all run with `pytest` and `pytest-asyncio`.
+
+### Running Tests
+
 ```bash
-# Run tests for Auth Service
-cd services/auth
-pytest --cov=app --cov-report=html
+# Via Docker (recommended — no local setup needed)
+docker exec photo-platform-auth python -m pytest tests/ -v
+docker exec photo-platform-application python -m pytest tests/ -v
+docker exec photo-platform-admin python -m pytest tests/ -v
 
-# Run tests for Application Service
-cd services/application
-pytest --cov=app --cov-report=html
+# Via Makefile
+make test            # Run all services
+make test-auth       # Auth service only
+make test-app        # Application service only
+make test-admin      # Admin service only
 
-# Run tests for Admin Service
-cd services/admin
-pytest --cov=app --cov-report=html
-
-# Run frontend tests
-cd frontend
-npm test
+# Locally (requires venv + dependencies)
+cd services/auth && pytest tests/ -v --cov=app
+cd services/application && pytest tests/ -v --cov=app
+cd services/admin && pytest tests/ -v --cov=app
 ```
 
 ## Deployment

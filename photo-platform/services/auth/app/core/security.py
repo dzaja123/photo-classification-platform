@@ -244,7 +244,7 @@ def get_token_expiration(token: str) -> Optional[datetime]:
         )
         exp_timestamp = payload.get("exp")
         if exp_timestamp:
-            return datetime.fromtimestamp(exp_timestamp)
+            return datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
         return None
     except JWTError:
         return None

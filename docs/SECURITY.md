@@ -41,12 +41,10 @@ Redis-backed per-IP rate limiting with configurable windows:
 |----------|-------|-----|
 | Registration | 3/minute | Prevents mass account creation |
 | Login | 5/minute | Mitigates credential stuffing |
-| Token refresh | 10/minute | Limits token abuse |
-| General API | 60/minute | Prevents DoS from single IP |
 
 Response headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
 
-**Where**: `services/auth/app/api/middleware/rate_limiter.py`
+**Where**: `services/auth/app/middleware/rate_limit.py`
 **Why**: Redis counters with TTL are atomic and fast enough for the hot path (every request).
 
 ## Input Validation
@@ -61,15 +59,15 @@ Response headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Res
 
 ## Audit Logging
 
-All security-relevant events are logged to MongoDB:
+All security-relevant events are logged to MongoDB via the Auth Service:
 - Login / logout / failed login
-- Registration
+- Registration (success and failure)
 - Password changes
-- Rate limit violations
-- Invalid token attempts
-- Admin actions (export, filter)
+- Token refresh
 
-**Where**: `shared/audit_logger.py` → `AuditLogger` class, called from service layers
+Admin Service **reads** audit logs for the admin panel (list, filter, user timeline, security events).
+
+**Where**: `shared/audit_logger.py` → `AuditLogger` class, called from `services/auth/app/services/auth_service.py`
 **Why**: MongoDB's schema flexibility handles different event types with varying metadata shapes. Separate from PostgreSQL to avoid write contention on the transactional database.
 
 ## Infrastructure Security

@@ -90,7 +90,7 @@ jobs:
       MONGODB_URL: mongodb://admin:admin@localhost:27017
       JWT_SECRET_KEY: test-secret-key-minimum-32-characters-long
       DEBUG: "true"
-      PYTHONPATH: ${{ github.workspace }}
+      PYTHONPATH: ${{ github.workspace }}/services/${{ matrix.service }}:${{ github.workspace }}
 
     steps:
       - uses: actions/checkout@v4
@@ -176,7 +176,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ---------------------------------------------------------------------------
-  # Deploy (placeholder – adapt to your cloud provider)
+  # Deploy (placeholder)
   # ---------------------------------------------------------------------------
   deploy:
     name: Deploy

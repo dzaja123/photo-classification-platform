@@ -13,7 +13,7 @@ from shared.enums import UserRole
 class User(Base):
     """
     User model for authentication and profile management.
-    
+
     Attributes:
         id: Unique user identifier (UUID)
         email: User email (unique, indexed)
@@ -27,77 +27,53 @@ class User(Base):
         updated_at: Last update timestamp
         last_login: Last login timestamp
     """
-    
+
     __tablename__ = "users"
-    
+
     # Primary key
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        index=True
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True
     )
-    
+
     # Authentication
     email: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True
+        String(255), unique=True, nullable=False, index=True
     )
     username: Mapped[str] = mapped_column(
-        String(100),
-        unique=True,
-        nullable=False,
-        index=True
+        String(100), unique=True, nullable=False, index=True
     )
-    hashed_password: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False
-    )
-    
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+
     # Profile
-    full_name: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True
-    )
-    
+    full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
     # Role and status
     role: Mapped[UserRole] = mapped_column(
         SQLEnum(UserRole, name="user_role"),
         default=UserRole.USER,
         nullable=False,
-        index=True
+        index=True,
     )
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True,
-        nullable=False
-    )
-    is_verified: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False
-    )
-    
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
-        index=True
+        index=True,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
-        nullable=False
+        nullable=False,
     )
     last_login: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
+        DateTime(timezone=True), nullable=True
     )
-    
+
     def __repr__(self) -> str:
         """String representation of User."""
         return f"<User(id={self.id}, email={self.email}, role={self.role})>"

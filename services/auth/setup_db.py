@@ -15,7 +15,6 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from app.config import get_settings
 from app.core.database import engine, Base
-from app.models import User, RefreshToken
 
 
 async def create_tables():
@@ -54,19 +53,19 @@ async def check_connection():
 async def main():
     """Main setup function."""
     settings = get_settings()
-    
-    print(f"\n{'='*60}")
-    print(f"  Auth Service Database Setup")
-    print(f"{'='*60}\n")
+
+    print(f"\n{'=' * 60}")
+    print("  Auth Service Database Setup")
+    print(f"{'=' * 60}\n")
     print(f"Database URL: {settings.database_url}")
-    print(f"\nOptions:")
+    print("\nOptions:")
     print("  1. Check database connection")
     print("  2. Create tables (use Alembic instead for production)")
     print("  3. Drop all tables (DANGEROUS!)")
     print("  4. Exit")
-    
+
     choice = input("\nEnter your choice (1-4): ")
-    
+
     if choice == "1":
         await check_connection()
     elif choice == "2":
@@ -79,7 +78,7 @@ async def main():
         print("Exiting...")
     else:
         print("Invalid choice!")
-    
+
     await engine.dispose()
 
 

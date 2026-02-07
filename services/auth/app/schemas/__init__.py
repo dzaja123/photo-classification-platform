@@ -1,17 +1,12 @@
 """Pydantic schemas for Auth Service."""
 
-from app.schemas.user import (
-    UserCreate,
-    UserUpdate,
-    UserResponse,
-    UserInDB
-)
+from app.schemas.user import UserCreate, UserUpdate, UserResponse, UserInDB
 from app.schemas.auth import (
     LoginRequest,
     TokenResponse,
     TokenPayload,
     RefreshTokenRequest,
-    PasswordChangeRequest
+    PasswordChangeRequest,
 )
 
 __all__ = [

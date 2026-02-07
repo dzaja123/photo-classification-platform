@@ -2,11 +2,7 @@
 
 from typing import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    create_async_engine,
-    async_sessionmaker
-)
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 
 from app.config import get_settings
@@ -20,7 +16,7 @@ engine = create_async_engine(
     echo=settings.debug,
     pool_pre_ping=True,
     pool_size=5,
-    max_overflow=10
+    max_overflow=10,
 )
 
 # Create async session factory
@@ -29,7 +25,7 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
     autocommit=False,
-    autoflush=False
+    autoflush=False,
 )
 
 # Base class for models
@@ -39,10 +35,10 @@ Base = declarative_base()
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency for getting async database session.
-    
+
     Yields:
         AsyncSession: Database session
-    
+
     Usage:
         @app.get("/items")
         async def get_items(db: AsyncSession = Depends(get_db)):

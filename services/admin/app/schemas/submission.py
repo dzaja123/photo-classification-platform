@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 class SubmissionResponse(BaseModel):
     """Schema for submission response."""
-    
+
     id: UUID
     user_id: UUID
     name: str
@@ -28,14 +28,14 @@ class SubmissionResponse(BaseModel):
     classified_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
 
 class SubmissionListResponse(BaseModel):
     """Schema for paginated submission list."""
-    
+
     total: int
     page: int
     page_size: int

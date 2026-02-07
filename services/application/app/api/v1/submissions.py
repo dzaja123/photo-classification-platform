@@ -39,6 +39,7 @@ settings = get_settings()
 # Background classification task
 # ---------------------------------------------------------------------------
 
+
 async def classify_submission_background(submission_id: uuid.UUID) -> None:
     """
     Background task to classify a photo submission.
@@ -97,6 +98,7 @@ async def classify_submission_background(submission_id: uuid.UUID) -> None:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.post("/upload", response_model=SubmissionResponse, status_code=201)
 async def upload_photo(

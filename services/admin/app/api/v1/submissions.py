@@ -31,11 +31,11 @@ def build_filters_query(
     classification_result: Optional[str] = None,
     date_from: Optional[datetime] = None,
     date_to: Optional[datetime] = None,
-    search: Optional[str] = None
+    search: Optional[str] = None,
 ) -> Select:
     """
     Build SQLAlchemy query with filters.
-    
+
     Args:
         query: Base query
         age_min: Minimum age
@@ -48,49 +48,49 @@ def build_filters_query(
         date_from: Start date
         date_to: End date
         search: Search term
-    
+
     Returns:
         Filtered query
     """
     conditions = [Submission.is_deleted.is_(False)]
-    
+
     # Age filters
     if age_min is not None:
         conditions.append(Submission.age >= age_min)
     if age_max is not None:
         conditions.append(Submission.age <= age_max)
-    
+
     # Gender filter
     if gender:
         conditions.append(Submission.gender.in_(gender))
-    
+
     # Country filter
     if country:
         conditions.append(Submission.country.in_(country))
-    
+
     # Location filter (partial match)
     if location:
         conditions.append(Submission.location.ilike(f"%{location}%"))
-    
+
     # Classification filters
     if classification_status:
         conditions.append(Submission.classification_status == classification_status)
-    
+
     if classification_result:
         # Search in JSON classification_results
         conditions.append(
             func.jsonb_path_exists(
                 Submission.classification_results,
-                f'$[*] ? (@.class == "{classification_result}")'
+                f'$[*] ? (@.class == "{classification_result}")',
             )
         )
-    
+
     # Date filters
     if date_from:
         conditions.append(Submission.created_at >= date_from)
     if date_to:
         conditions.append(Submission.created_at <= date_to)
-    
+
     # Search filter (name or location)
     if search:
         search_term = f"%{search}%"
@@ -98,10 +98,10 @@ def build_filters_query(
             or_(
                 Submission.name.ilike(search_term),
                 Submission.location.ilike(search_term),
-                Submission.country.ilike(search_term)
+                Submission.country.ilike(search_term),
             )
         )
-    
+
     return query.where(and_(*conditions))
 
 
@@ -110,41 +110,45 @@ async def list_submissions(
     # Age filters
     age_min: Optional[int] = Query(None, ge=1, le=150, description="Minimum age"),
     age_max: Optional[int] = Query(None, ge=1, le=150, description="Maximum age"),
-    
     # Gender filter
-    gender: Optional[List[str]] = Query(None, description="Filter by gender (can specify multiple)"),
-    
+    gender: Optional[List[str]] = Query(
+        None, description="Filter by gender (can specify multiple)"
+    ),
     # Location filters
-    country: Optional[List[str]] = Query(None, description="Filter by country (can specify multiple)"),
-    location: Optional[str] = Query(None, description="Filter by location (partial match)"),
-    
+    country: Optional[List[str]] = Query(
+        None, description="Filter by country (can specify multiple)"
+    ),
+    location: Optional[str] = Query(
+        None, description="Filter by location (partial match)"
+    ),
     # Classification filters
-    classification_status: Optional[str] = Query(None, description="Filter by status (pending/processing/completed/failed)"),
-    classification_result: Optional[str] = Query(None, description="Filter by classification result"),
-    
+    classification_status: Optional[str] = Query(
+        None, description="Filter by status (pending/processing/completed/failed)"
+    ),
+    classification_result: Optional[str] = Query(
+        None, description="Filter by classification result"
+    ),
     # Date filters
     date_from: Optional[datetime] = Query(None, description="Start date (ISO format)"),
     date_to: Optional[datetime] = Query(None, description="End date (ISO format)"),
-    
     # Search
-    search: Optional[str] = Query(None, description="Search in name, location, country"),
-    
+    search: Optional[str] = Query(
+        None, description="Search in name, location, country"
+    ),
     # Pagination
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
-    
     # Sorting
     sort_by: str = Query("created_at", description="Sort by field"),
     sort_order: str = Query("desc", description="Sort order (asc/desc)"),
-    
     db: AsyncSession = Depends(get_db),
     _admin: dict = Depends(get_current_admin),
 ):
     """
     List all submissions with advanced filtering.
-    
+
     **Admin only endpoint** - requires admin role.
-    
+
     Supports filtering by:
     - Age range (min/max)
     - Gender (multiple)
@@ -154,12 +158,12 @@ async def list_submissions(
     - Classification result
     - Date range
     - Search term
-    
+
     Results are paginated and sortable.
     """
     # Build base query
     query = select(Submission)
-    
+
     # Apply filters
     query = build_filters_query(
         query,
@@ -172,9 +176,9 @@ async def list_submissions(
         classification_result=classification_result,
         date_from=date_from,
         date_to=date_to,
-        search=search
+        search=search,
     )
-    
+
     # Get total count
     count_query = select(func.count()).select_from(Submission)
     count_query = build_filters_query(
@@ -188,30 +192,30 @@ async def list_submissions(
         classification_result=classification_result,
         date_from=date_from,
         date_to=date_to,
-        search=search
+        search=search,
     )
-    
+
     total_result = await db.execute(count_query)
     total = total_result.scalar()
-    
+
     # Apply sorting
     sort_column = getattr(Submission, sort_by, Submission.created_at)
     if sort_order.lower() == "asc":
         query = query.order_by(asc(sort_column))
     else:
         query = query.order_by(desc(sort_column))
-    
+
     # Apply pagination
     offset = (page - 1) * page_size
     query = query.offset(offset).limit(page_size)
-    
+
     # Execute query
     result = await db.execute(query)
     submissions = result.scalars().all()
-    
+
     # Calculate total pages
     total_pages = math.ceil(total / page_size) if total > 0 else 0
-    
+
     # Build filters applied dict
     filters_applied = {}
     if age_min is not None:
@@ -234,14 +238,14 @@ async def list_submissions(
         filters_applied["date_to"] = date_to.isoformat()
     if search:
         filters_applied["search"] = search
-    
+
     return SubmissionListResponse(
         total=total,
         page=page,
         page_size=page_size,
         total_pages=total_pages,
         submissions=submissions,
-        filters_applied=filters_applied if filters_applied else None
+        filters_applied=filters_applied if filters_applied else None,
     )
 
 
@@ -253,20 +257,19 @@ async def get_submission(
 ):
     """
     Get a specific submission by ID.
-    
+
     **Admin only endpoint** - requires admin role.
     """
     result = await db.execute(
         select(Submission).where(
-            Submission.id == submission_id,
-            Submission.is_deleted.is_(False)
+            Submission.id == submission_id, Submission.is_deleted.is_(False)
         )
     )
     submission = result.scalar_one_or_none()
-    
+
     if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")
-    
+
     return submission
 
 
@@ -277,9 +280,9 @@ async def get_analytics(
 ):
     """
     Get analytics dashboard data.
-    
+
     **Admin only endpoint** - requires admin role.
-    
+
     Returns aggregated statistics:
     - Total submissions and users
     - Submissions by time period
@@ -292,76 +295,79 @@ async def get_analytics(
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = now - timedelta(days=7)
     month_start = now - timedelta(days=30)
-    
+
     # Total submissions
     total_submissions_result = await db.execute(
-        select(func.count()).select_from(Submission).where(Submission.is_deleted.is_(False))
+        select(func.count())
+        .select_from(Submission)
+        .where(Submission.is_deleted.is_(False))
     )
     total_submissions = total_submissions_result.scalar()
-    
+
     # Total unique users
     total_users_result = await db.execute(
-        select(func.count(func.distinct(Submission.user_id))).select_from(Submission).where(Submission.is_deleted.is_(False))
+        select(func.count(func.distinct(Submission.user_id)))
+        .select_from(Submission)
+        .where(Submission.is_deleted.is_(False))
     )
     total_users = total_users_result.scalar()
-    
+
     # Submissions today
     submissions_today_result = await db.execute(
-        select(func.count()).select_from(Submission).where(
-            and_(
-                Submission.is_deleted.is_(False),
-                Submission.created_at >= today_start
-            )
+        select(func.count())
+        .select_from(Submission)
+        .where(
+            and_(Submission.is_deleted.is_(False), Submission.created_at >= today_start)
         )
     )
     submissions_today = submissions_today_result.scalar()
-    
+
     # Submissions this week
     submissions_week_result = await db.execute(
-        select(func.count()).select_from(Submission).where(
-            and_(
-                Submission.is_deleted.is_(False),
-                Submission.created_at >= week_start
-            )
+        select(func.count())
+        .select_from(Submission)
+        .where(
+            and_(Submission.is_deleted.is_(False), Submission.created_at >= week_start)
         )
     )
     submissions_this_week = submissions_week_result.scalar()
-    
+
     # Submissions this month
     submissions_month_result = await db.execute(
-        select(func.count()).select_from(Submission).where(
-            and_(
-                Submission.is_deleted.is_(False),
-                Submission.created_at >= month_start
-            )
+        select(func.count())
+        .select_from(Submission)
+        .where(
+            and_(Submission.is_deleted.is_(False), Submission.created_at >= month_start)
         )
     )
     submissions_this_month = submissions_month_result.scalar()
-    
+
     # By gender
     by_gender_result = await db.execute(
-        select(Submission.gender, func.count()).where(
-            Submission.is_deleted.is_(False)
-        ).group_by(Submission.gender)
+        select(Submission.gender, func.count())
+        .where(Submission.is_deleted.is_(False))
+        .group_by(Submission.gender)
     )
     by_gender = {row[0]: row[1] for row in by_gender_result}
-    
+
     # By country (top 10)
     by_country_result = await db.execute(
-        select(Submission.country, func.count()).where(
-            Submission.is_deleted.is_(False)
-        ).group_by(Submission.country).order_by(desc(func.count())).limit(10)
+        select(Submission.country, func.count())
+        .where(Submission.is_deleted.is_(False))
+        .group_by(Submission.country)
+        .order_by(desc(func.count()))
+        .limit(10)
     )
     by_country = {row[0]: row[1] for row in by_country_result}
-    
+
     # By classification status
     by_status_result = await db.execute(
-        select(Submission.classification_status, func.count()).where(
-            Submission.is_deleted.is_(False)
-        ).group_by(Submission.classification_status)
+        select(Submission.classification_status, func.count())
+        .where(Submission.is_deleted.is_(False))
+        .group_by(Submission.classification_status)
     )
     by_status = {row[0]: row[1] for row in by_status_result}
-    
+
     # By classification result (top 10) — extract top-1 class from JSONB
     by_classification = {}
     try:
@@ -387,7 +393,7 @@ async def get_analytics(
     except Exception:
         await db.rollback()
         by_classification = {}
-    
+
     # Age distribution
     age_distribution = []
     try:
@@ -400,12 +406,12 @@ async def get_analytics(
                     (Submission.age <= 45, "36-45"),
                     (Submission.age <= 55, "46-55"),
                     (Submission.age <= 65, "56-65"),
-                    else_="65+"
+                    else_="65+",
                 ).label("age_range"),
-                func.count().label("count")
-            ).where(
-                Submission.is_deleted.is_(False)
-            ).group_by(sa.text("age_range"))
+                func.count().label("count"),
+            )
+            .where(Submission.is_deleted.is_(False))
+            .group_by(sa.text("age_range"))
         )
         age_distribution = [
             AgeDistribution(range=row[0], count=row[1])
@@ -414,14 +420,14 @@ async def get_analytics(
     except Exception:
         await db.rollback()
         age_distribution = []
-    
+
     # Average confidence from top-1 prediction
     avg_confidence = 0.0
     try:
         conf_expr = func.cast(
-            func.jsonb_array_element(
-                Submission.classification_results, 0
-            ).op("->>")("confidence"),
+            func.jsonb_array_element(Submission.classification_results, 0).op("->>")(
+                "confidence"
+            ),
             sa.Float,
         )
         avg_conf_result = await db.execute(
@@ -438,7 +444,7 @@ async def get_analytics(
     except Exception:
         await db.rollback()
         avg_confidence = 0.0
-    
+
     return AnalyticsResponse(
         total_submissions=total_submissions,
         total_users=total_users,
@@ -450,5 +456,5 @@ async def get_analytics(
         by_classification=by_classification,
         by_status=by_status,
         age_distribution=age_distribution,
-        avg_confidence=avg_confidence
+        avg_confidence=avg_confidence,
     )

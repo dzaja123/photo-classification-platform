@@ -20,18 +20,18 @@ settings = get_settings()
 def hash_password(password: str) -> str:
     """
     Hash a password using bcrypt.
-    
+
     Args:
         password: Plain text password
-    
+
     Returns:
         Hashed password
-    
+
     Example:
         >>> hashed = hash_password("SecurePass123!")
         >>> verify_password("SecurePass123!", hashed)
         True
-    
+
     Note:
         Bcrypt has a 72-byte password limit. Following pyca/bcrypt best practices,
         we pre-hash with SHA256 and base64 encode to handle any password length
@@ -39,26 +39,26 @@ def hash_password(password: str) -> str:
     """
     # Pre-hash with SHA256 and base64 encode (pyca/bcrypt recommended approach)
     # This handles passwords of any length and avoids NULL byte issues
-    password_hash = hashlib.sha256(password.encode('utf-8')).digest()
+    password_hash = hashlib.sha256(password.encode("utf-8")).digest()
     password_b64 = base64.b64encode(password_hash)
-    
+
     # Use bcrypt directly
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password_b64, salt)
-    return hashed.decode('utf-8')
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verify a password against its hash.
-    
+
     Args:
         plain_password: Plain text password to verify
         hashed_password: Hashed password to compare against
-    
+
     Returns:
         True if password matches, False otherwise
-    
+
     Example:
         >>> hashed = hash_password("SecurePass123!")
         >>> verify_password("SecurePass123!", hashed)
@@ -67,29 +67,29 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         False
     """
     # Apply same SHA256 + base64 pre-hash as in hash_password
-    password_hash = hashlib.sha256(plain_password.encode('utf-8')).digest()
+    password_hash = hashlib.sha256(plain_password.encode("utf-8")).digest()
     password_b64 = base64.b64encode(password_hash)
-    return bcrypt.checkpw(password_b64, hashed_password.encode('utf-8'))
+    return bcrypt.checkpw(password_b64, hashed_password.encode("utf-8"))
 
 
 def create_access_token(
     user_id: UUID,
     username: str,
     role: UserRole,
-    expires_delta: Optional[timedelta] = None
+    expires_delta: Optional[timedelta] = None,
 ) -> str:
     """
     Create a JWT access token.
-    
+
     Args:
         user_id: User UUID
         username: Username
         role: User role
         expires_delta: Token expiration time (default: from settings)
-    
+
     Returns:
         Encoded JWT token
-    
+
     Example:
         >>> token = create_access_token(
         ...     user_id=UUID("123e4567-e89b-12d3-a456-426614174000"),
@@ -99,10 +99,10 @@ def create_access_token(
     """
     if expires_delta is None:
         expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
-    
+
     now = datetime.now(timezone.utc)
     expire = now + expires_delta
-    
+
     payload = {
         "sub": str(user_id),
         "username": username,
@@ -110,15 +110,13 @@ def create_access_token(
         "exp": expire,
         "iat": now,
         "jti": secrets.token_urlsafe(32),  # JWT ID for blacklisting
-        "token_type": TokenType.ACCESS
+        "token_type": TokenType.ACCESS,
     }
-    
+
     encoded_jwt = jwt.encode(
-        payload,
-        settings.jwt_secret_key,
-        algorithm=settings.jwt_algorithm
+        payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
     )
-    
+
     return encoded_jwt
 
 
@@ -126,20 +124,20 @@ def create_refresh_token(
     user_id: UUID,
     username: str,
     role: UserRole,
-    expires_delta: Optional[timedelta] = None
+    expires_delta: Optional[timedelta] = None,
 ) -> str:
     """
     Create a JWT refresh token.
-    
+
     Args:
         user_id: User UUID
         username: Username
         role: User role
         expires_delta: Token expiration time (default: from settings)
-    
+
     Returns:
         Encoded JWT refresh token
-    
+
     Example:
         >>> token = create_refresh_token(
         ...     user_id=UUID("123e4567-e89b-12d3-a456-426614174000"),
@@ -149,10 +147,10 @@ def create_refresh_token(
     """
     if expires_delta is None:
         expires_delta = timedelta(days=settings.refresh_token_expire_days)
-    
+
     now = datetime.now(timezone.utc)
     expire = now + expires_delta
-    
+
     payload = {
         "sub": str(user_id),
         "username": username,
@@ -160,31 +158,29 @@ def create_refresh_token(
         "exp": expire,
         "iat": now,
         "jti": secrets.token_urlsafe(32),
-        "token_type": TokenType.REFRESH
+        "token_type": TokenType.REFRESH,
     }
-    
+
     encoded_jwt = jwt.encode(
-        payload,
-        settings.jwt_secret_key,
-        algorithm=settings.jwt_algorithm
+        payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
     )
-    
+
     return encoded_jwt
 
 
 def decode_token(token: str) -> Dict[str, Any]:
     """
     Decode and verify a JWT token.
-    
+
     Args:
         token: JWT token to decode
-    
+
     Returns:
         Token payload as dictionary
-    
+
     Raises:
         JWTError: If token is invalid or expired
-    
+
     Example:
         >>> token = create_access_token(...)
         >>> payload = decode_token(token)
@@ -192,9 +188,7 @@ def decode_token(token: str) -> Dict[str, Any]:
     """
     try:
         payload = jwt.decode(
-            token,
-            settings.jwt_secret_key,
-            algorithms=[settings.jwt_algorithm]
+            token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
         )
         return payload
     except JWTError as e:
@@ -204,12 +198,12 @@ def decode_token(token: str) -> Dict[str, Any]:
 def get_token_jti(token: str) -> Optional[str]:
     """
     Extract JTI (JWT ID) from token without full validation.
-    
+
     Useful for blacklisting tokens.
-    
+
     Args:
         token: JWT token
-    
+
     Returns:
         JTI string or None if not found
     """
@@ -218,7 +212,7 @@ def get_token_jti(token: str) -> Optional[str]:
             token,
             settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm],
-            options={"verify_exp": False}  # Don't verify expiration
+            options={"verify_exp": False},  # Don't verify expiration
         )
         return payload.get("jti")
     except JWTError:
@@ -228,10 +222,10 @@ def get_token_jti(token: str) -> Optional[str]:
 def get_token_expiration(token: str) -> Optional[datetime]:
     """
     Extract expiration time from token.
-    
+
     Args:
         token: JWT token
-    
+
     Returns:
         Expiration datetime or None if not found
     """
@@ -240,7 +234,7 @@ def get_token_expiration(token: str) -> Optional[datetime]:
             token,
             settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm],
-            options={"verify_exp": False}
+            options={"verify_exp": False},
         )
         exp_timestamp = payload.get("exp")
         if exp_timestamp:

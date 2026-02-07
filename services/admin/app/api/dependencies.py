@@ -1,7 +1,6 @@
 """FastAPI dependencies for authentication and authorization in Admin Service."""
 
 from typing import Optional
-from uuid import UUID
 
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials

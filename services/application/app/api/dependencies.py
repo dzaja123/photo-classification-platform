@@ -29,9 +29,7 @@ def _decode_token(token: str) -> dict:
         JWTError: If token is invalid or expired
     """
     return jwt.decode(
-        token,
-        settings.jwt_secret_key,
-        algorithms=[settings.jwt_algorithm]
+        token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
     )
 
 

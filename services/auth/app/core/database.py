@@ -33,10 +33,10 @@ Base = declarative_base()
 async def get_db() -> AsyncSession:
     """
     Dependency for getting database session.
-    
+
     Yields:
         AsyncSession: Database session
-    
+
     Usage:
         @app.get("/users")
         async def get_users(db: AsyncSession = Depends(get_db)):

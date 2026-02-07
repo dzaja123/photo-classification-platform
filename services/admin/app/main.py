@@ -20,15 +20,15 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """
     Application lifespan handler.
-    
+
     Handles startup and shutdown events:
     - Startup: Initialize database connections
     - Shutdown: Close database connections
     """
     logger.info("Starting %s v%s", settings.app_name, settings.app_version)
-    
+
     yield
-    
+
     logger.info("Shutting down")
     await engine.dispose()
     await close_mongodb()
@@ -41,7 +41,7 @@ app = FastAPI(
     description="Admin service for submissions management, filtering, and analytics",
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -55,8 +55,12 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(submissions.router, prefix="/api/v1/admin", tags=["Admin - Submissions"])
-app.include_router(audit_logs.router, prefix="/api/v1/admin", tags=["Admin - Audit Logs"])
+app.include_router(
+    submissions.router, prefix="/api/v1/admin", tags=["Admin - Submissions"]
+)
+app.include_router(
+    audit_logs.router, prefix="/api/v1/admin", tags=["Admin - Audit Logs"]
+)
 app.include_router(export.router, prefix="/api/v1/admin", tags=["Admin - Export"])
 
 
@@ -64,7 +68,7 @@ app.include_router(export.router, prefix="/api/v1/admin", tags=["Admin - Export"
 async def get_status():
     """
     Get admin service status.
-    
+
     Returns service information and health status.
     """
     return {
@@ -75,8 +79,8 @@ async def get_status():
             "submissions_filtering": "ready",
             "analytics": "ready",
             "audit_logs": "ready",
-            "data_export": "ready"
-        }
+            "data_export": "ready",
+        },
     }
 
 
@@ -87,7 +91,7 @@ async def health_check():
         content={
             "status": "healthy",
             "service": settings.app_name,
-            "version": settings.app_version
+            "version": settings.app_version,
         }
     )
 
@@ -98,5 +102,5 @@ async def root():
     return {
         "service": settings.app_name,
         "version": settings.app_version,
-        "docs": "/docs" if settings.debug else "disabled"
+        "docs": "/docs" if settings.debug else "disabled",
     }

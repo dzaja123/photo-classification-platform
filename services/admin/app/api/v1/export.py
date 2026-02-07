@@ -40,12 +40,12 @@ async def export_submissions_csv(
 ):
     """
     Export submissions to CSV format.
-    
+
     **Admin only endpoint** - requires admin role.
-    
+
     Applies the same filters as the list endpoint.
     Maximum 10,000 records per export.
-    
+
     Returns CSV file for download.
     """
     # Build query with filters
@@ -61,76 +61,80 @@ async def export_submissions_csv(
         classification_result=classification_result,
         date_from=date_from,
         date_to=date_to,
-        search=search
+        search=search,
     )
-    
+
     # Limit results
     query = query.limit(min(limit, settings.export_max_records))
-    
+
     # Execute query
     result = await db.execute(query)
     submissions = result.scalars().all()
-    
+
     # Create CSV
     output = StringIO()
     writer = csv.writer(output)
-    
+
     # Write header
-    writer.writerow([
-        'ID',
-        'User ID',
-        'Name',
-        'Age',
-        'Gender',
-        'Location',
-        'Country',
-        'Description',
-        'Photo Filename',
-        'Photo Size (bytes)',
-        'Classification Status',
-        'Classification Result',
-        'Classification Confidence',
-        'Created At',
-        'Classified At'
-    ])
-    
+    writer.writerow(
+        [
+            "ID",
+            "User ID",
+            "Name",
+            "Age",
+            "Gender",
+            "Location",
+            "Country",
+            "Description",
+            "Photo Filename",
+            "Photo Size (bytes)",
+            "Classification Status",
+            "Classification Result",
+            "Classification Confidence",
+            "Created At",
+            "Classified At",
+        ]
+    )
+
     # Write data
     for sub in submissions:
         # Extract top classification result
         classification_class = ""
         classification_conf = ""
         if sub.classification_results and len(sub.classification_results) > 0:
-            classification_class = sub.classification_results[0].get('class', '')
-            classification_conf = sub.classification_results[0].get('confidence', '')
-        
-        writer.writerow([
-            str(sub.id),
-            str(sub.user_id),
-            sub.name,
-            sub.age,
-            sub.gender,
-            sub.location,
-            sub.country,
-            sub.description or '',
-            sub.photo_filename,
-            sub.photo_size,
-            sub.classification_status,
-            classification_class,
-            classification_conf,
-            sub.created_at.isoformat() if sub.created_at else '',
-            sub.classified_at.isoformat() if sub.classified_at else ''
-        ])
-    
+            classification_class = sub.classification_results[0].get("class", "")
+            classification_conf = sub.classification_results[0].get("confidence", "")
+
+        writer.writerow(
+            [
+                str(sub.id),
+                str(sub.user_id),
+                sub.name,
+                sub.age,
+                sub.gender,
+                sub.location,
+                sub.country,
+                sub.description or "",
+                sub.photo_filename,
+                sub.photo_size,
+                sub.classification_status,
+                classification_class,
+                classification_conf,
+                sub.created_at.isoformat() if sub.created_at else "",
+                sub.classified_at.isoformat() if sub.classified_at else "",
+            ]
+        )
+
     # Return CSV file
     csv_content = output.getvalue()
-    filename = f"submissions_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
-    
+    filename = (
+        f"submissions_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+    )
+
     return Response(
         content=csv_content,
         media_type="text/csv",
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}"
-        }
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
@@ -153,12 +157,12 @@ async def export_submissions_json(
 ):
     """
     Export submissions to JSON format.
-    
+
     **Admin only endpoint** - requires admin role.
-    
+
     Applies the same filters as the list endpoint.
     Maximum 10,000 records per export.
-    
+
     Returns JSON file for download.
     """
     # Build query with filters
@@ -174,65 +178,70 @@ async def export_submissions_json(
         classification_result=classification_result,
         date_from=date_from,
         date_to=date_to,
-        search=search
+        search=search,
     )
-    
+
     # Limit results
     query = query.limit(min(limit, settings.export_max_records))
-    
+
     # Execute query
     result = await db.execute(query)
     submissions = result.scalars().all()
-    
+
     # Convert to JSON-serializable format
     data = []
     for sub in submissions:
-        data.append({
-            "id": str(sub.id),
-            "user_id": str(sub.user_id),
-            "name": sub.name,
-            "age": sub.age,
-            "gender": sub.gender,
-            "location": sub.location,
-            "country": sub.country,
-            "description": sub.description,
-            "photo_filename": sub.photo_filename,
-            "photo_path": sub.photo_path,
-            "photo_size": sub.photo_size,
-            "photo_mime_type": sub.photo_mime_type,
-            "classification_status": sub.classification_status,
-            "classification_results": sub.classification_results,
-            "classification_error": sub.classification_error,
-            "classified_at": sub.classified_at.isoformat() if sub.classified_at else None,
-            "created_at": sub.created_at.isoformat() if sub.created_at else None,
-            "updated_at": sub.updated_at.isoformat() if sub.updated_at else None
-        })
-    
+        data.append(
+            {
+                "id": str(sub.id),
+                "user_id": str(sub.user_id),
+                "name": sub.name,
+                "age": sub.age,
+                "gender": sub.gender,
+                "location": sub.location,
+                "country": sub.country,
+                "description": sub.description,
+                "photo_filename": sub.photo_filename,
+                "photo_path": sub.photo_path,
+                "photo_size": sub.photo_size,
+                "photo_mime_type": sub.photo_mime_type,
+                "classification_status": sub.classification_status,
+                "classification_results": sub.classification_results,
+                "classification_error": sub.classification_error,
+                "classified_at": sub.classified_at.isoformat()
+                if sub.classified_at
+                else None,
+                "created_at": sub.created_at.isoformat() if sub.created_at else None,
+                "updated_at": sub.updated_at.isoformat() if sub.updated_at else None,
+            }
+        )
+
     # Create JSON
-    json_content = json.dumps({
-        "export_date": datetime.now(timezone.utc).isoformat(),
-        "total_records": len(data),
-        "filters_applied": {
-            "age_min": age_min,
-            "age_max": age_max,
-            "gender": gender,
-            "country": country,
-            "location": location,
-            "classification_status": classification_status,
-            "classification_result": classification_result,
-            "date_from": date_from.isoformat() if date_from else None,
-            "date_to": date_to.isoformat() if date_to else None,
-            "search": search
+    json_content = json.dumps(
+        {
+            "export_date": datetime.now(timezone.utc).isoformat(),
+            "total_records": len(data),
+            "filters_applied": {
+                "age_min": age_min,
+                "age_max": age_max,
+                "gender": gender,
+                "country": country,
+                "location": location,
+                "classification_status": classification_status,
+                "classification_result": classification_result,
+                "date_from": date_from.isoformat() if date_from else None,
+                "date_to": date_to.isoformat() if date_to else None,
+                "search": search,
+            },
+            "submissions": data,
         },
-        "submissions": data
-    }, indent=2)
-    
+        indent=2,
+    )
+
     filename = f"submissions_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
-    
+
     return Response(
         content=json_content,
         media_type="application/json",
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}"
-        }
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )

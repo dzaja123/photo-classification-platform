@@ -40,7 +40,7 @@ CLASSIFICATION_CATEGORIES = [
     "Food",
     "Person",
     "Building",
-    "Nature"
+    "Nature",
 ]
 
 # Cache TTL (seconds)

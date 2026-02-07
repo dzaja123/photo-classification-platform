@@ -19,15 +19,15 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """
     Application lifespan handler.
-    
+
     Handles startup and shutdown events:
     - Startup: Initialize database connections
     - Shutdown: Close database connections
     """
     logger.info("Starting %s v%s", settings.app_name, settings.app_version)
-    
+
     yield
-    
+
     logger.info("Shutting down")
     await engine.dispose()
 
@@ -39,7 +39,7 @@ app = FastAPI(
     description="Photo upload and classification service with ML",
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -53,14 +53,16 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(submissions.router, prefix="/api/v1/submissions", tags=["Submissions"])
+app.include_router(
+    submissions.router, prefix="/api/v1/submissions", tags=["Submissions"]
+)
 
 
 @app.get("/api/v1/status", tags=["Status"])
 async def get_status():
     """
     Get application service status.
-    
+
     Returns service information and health status.
     """
     return {
@@ -70,8 +72,8 @@ async def get_status():
         "features": {
             "photo_upload": "ready",
             "ml_classification": "pending",
-            "storage": "minio"
-        }
+            "storage": "minio",
+        },
     }
 
 
@@ -82,7 +84,7 @@ async def health_check():
         content={
             "status": "healthy",
             "service": settings.app_name,
-            "version": settings.app_version
+            "version": settings.app_version,
         }
     )
 
@@ -93,5 +95,5 @@ async def root():
     return {
         "service": settings.app_name,
         "version": settings.app_version,
-        "docs": "/docs" if settings.debug else "disabled"
+        "docs": "/docs" if settings.debug else "disabled",
     }

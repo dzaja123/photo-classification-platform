@@ -39,9 +39,7 @@ async def create_admin() -> None:
 
     async with AsyncSessionLocal() as db:
         # Check if an admin already exists
-        result = await db.execute(
-            select(User).where(User.role == UserRole.ADMIN)
-        )
+        result = await db.execute(select(User).where(User.role == UserRole.ADMIN))
         existing = result.scalar_one_or_none()
 
         if existing:
@@ -74,7 +72,7 @@ async def create_admin() -> None:
         db.add(admin)
         await db.commit()
 
-        print(f"Admin user created successfully!")
+        print("Admin user created successfully!")
         print(f"  Email:    {email}")
         print(f"  Username: {username}")
         print(f"  Password: {password}")

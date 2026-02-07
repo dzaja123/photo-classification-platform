@@ -3,11 +3,7 @@
 from app.schemas.submission import (
     SubmissionCreate,
     SubmissionResponse,
-    SubmissionListResponse
+    SubmissionListResponse,
 )
 
-__all__ = [
-    "SubmissionCreate",
-    "SubmissionResponse",
-    "SubmissionListResponse"
-]
+__all__ = ["SubmissionCreate", "SubmissionResponse", "SubmissionListResponse"]

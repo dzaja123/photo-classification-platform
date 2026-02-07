@@ -88,11 +88,7 @@ class SubmissionRepository:
             base_filter.append(Submission.classification_status == status)
 
         # Count
-        count_query = (
-            select(func.count())
-            .select_from(Submission)
-            .where(*base_filter)
-        )
+        count_query = select(func.count()).select_from(Submission).where(*base_filter)
         total = (await self.db.execute(count_query)).scalar()
 
         # Data

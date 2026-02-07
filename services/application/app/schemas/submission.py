@@ -4,23 +4,29 @@ from datetime import datetime
 from typing import Optional, List, Dict
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 class SubmissionCreate(BaseModel):
     """Schema for creating a submission."""
-    
+
     name: str = Field(..., min_length=1, max_length=255, description="Submitter's name")
     age: int = Field(..., ge=1, le=150, description="Submitter's age")
-    gender: str = Field(..., min_length=1, max_length=50, description="Submitter's gender")
-    location: str = Field(..., min_length=1, max_length=255, description="City/Location")
+    gender: str = Field(
+        ..., min_length=1, max_length=50, description="Submitter's gender"
+    )
+    location: str = Field(
+        ..., min_length=1, max_length=255, description="City/Location"
+    )
     country: str = Field(..., min_length=1, max_length=100, description="Country")
-    description: Optional[str] = Field(None, max_length=500, description="Optional description")
+    description: Optional[str] = Field(
+        None, max_length=500, description="Optional description"
+    )
 
 
 class SubmissionResponse(BaseModel):
     """Schema for submission response."""
-    
+
     id: UUID
     user_id: UUID
     name: str
@@ -39,14 +45,14 @@ class SubmissionResponse(BaseModel):
     classified_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
 
 class SubmissionListResponse(BaseModel):
     """Schema for paginated submission list."""
-    
+
     total: int
     page: int
     page_size: int

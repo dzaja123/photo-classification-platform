@@ -12,8 +12,6 @@ from alembic import context
 # Import models and config
 from app.config import get_settings
 from app.core.database import Base
-from app.models.user import User
-from app.models.token import RefreshToken
 
 # Alembic Config object
 config = context.config

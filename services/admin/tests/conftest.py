@@ -50,6 +50,7 @@ TestSessionLocal = async_sessionmaker(
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
     """Create event loop for async tests."""

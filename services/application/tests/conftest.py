@@ -46,6 +46,7 @@ TestSessionLocal = async_sessionmaker(
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
     """Create event loop for async tests."""
@@ -69,7 +70,10 @@ def _mock_storage():
     """Mock MinIO storage so tests don't need a live MinIO server."""
     mock_client = AsyncMock()
     with (
-        patch("app.services.submission_service.get_storage_client", return_value=mock_client),
+        patch(
+            "app.services.submission_service.get_storage_client",
+            return_value=mock_client,
+        ),
         patch("app.api.v1.submissions.get_storage_client", return_value=mock_client),
     ):
         mock_client.upload_file.return_value = "photos/test/photo.jpg"
@@ -104,9 +108,9 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture
 def test_image_jpg():
     """Create a test JPEG image."""
-    img = Image.new('RGB', (100, 100), color='red')
+    img = Image.new("RGB", (100, 100), color="red")
     img_bytes = BytesIO()
-    img.save(img_bytes, format='JPEG')
+    img.save(img_bytes, format="JPEG")
     img_bytes.seek(0)
     return img_bytes
 
@@ -114,9 +118,9 @@ def test_image_jpg():
 @pytest.fixture
 def test_image_png():
     """Create a test PNG image."""
-    img = Image.new('RGB', (100, 100), color='blue')
+    img = Image.new("RGB", (100, 100), color="blue")
     img_bytes = BytesIO()
-    img.save(img_bytes, format='PNG')
+    img.save(img_bytes, format="PNG")
     img_bytes.seek(0)
     return img_bytes
 
@@ -130,7 +134,7 @@ def test_submission_data():
         "gender": "Male",
         "location": "New York",
         "country": "USA",
-        "description": "Test photo submission"
+        "description": "Test photo submission",
     }
 
 
@@ -142,5 +146,5 @@ def test_submission_data_invalid_age():
         "age": 200,  # Invalid: > 150
         "gender": "Male",
         "location": "New York",
-        "country": "USA"
+        "country": "USA",
     }

@@ -37,6 +37,7 @@ TestSessionLocal = async_sessionmaker(
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
     """Create event loop for async tests."""
@@ -59,13 +60,39 @@ async def _setup_db():
 def _mock_redis():
     """Mock all Redis operations so tests don't need a live Redis server."""
     with (
-        patch("app.middleware.rate_limit.increment_rate_limit", new_callable=AsyncMock, return_value=(True, 1)),
-        patch("app.middleware.rate_limit.get_rate_limit_ttl", new_callable=AsyncMock, return_value=60),
-        patch("app.api.dependencies.is_token_blacklisted", new_callable=AsyncMock, return_value=False),
-        patch("app.core.cache.blacklist_token", new_callable=AsyncMock, return_value=True),
-        patch("app.core.cache.is_token_blacklisted", new_callable=AsyncMock, return_value=False),
-        patch("app.services.auth_service.blacklist_token", new_callable=AsyncMock, return_value=True),
-        patch("app.services.auth_service.is_token_blacklisted", new_callable=AsyncMock, return_value=False),
+        patch(
+            "app.middleware.rate_limit.increment_rate_limit",
+            new_callable=AsyncMock,
+            return_value=(True, 1),
+        ),
+        patch(
+            "app.middleware.rate_limit.get_rate_limit_ttl",
+            new_callable=AsyncMock,
+            return_value=60,
+        ),
+        patch(
+            "app.api.dependencies.is_token_blacklisted",
+            new_callable=AsyncMock,
+            return_value=False,
+        ),
+        patch(
+            "app.core.cache.blacklist_token", new_callable=AsyncMock, return_value=True
+        ),
+        patch(
+            "app.core.cache.is_token_blacklisted",
+            new_callable=AsyncMock,
+            return_value=False,
+        ),
+        patch(
+            "app.services.auth_service.blacklist_token",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+        patch(
+            "app.services.auth_service.is_token_blacklisted",
+            new_callable=AsyncMock,
+            return_value=False,
+        ),
     ):
         yield
 
@@ -73,6 +100,7 @@ def _mock_redis():
 @pytest.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
     """Create test HTTP client with DB override."""
+
     async def override_get_db():
         async with TestSessionLocal() as session:
             yield session
@@ -95,7 +123,7 @@ def test_user_data():
         "email": "test@example.com",
         "username": "testuser",
         "password": "Test123!@#",
-        "full_name": "Test User"
+        "full_name": "Test User",
     }
 
 
@@ -106,7 +134,7 @@ def test_user_data_invalid_email():
         "email": "invalid-email",
         "username": "testuser",
         "password": "Test123!@#",
-        "full_name": "Test User"
+        "full_name": "Test User",
     }
 
 
@@ -117,7 +145,7 @@ def test_user_data_weak_password():
         "email": "test@example.com",
         "username": "testuser",
         "password": "weak",
-        "full_name": "Test User"
+        "full_name": "Test User",
     }
 
 
@@ -128,5 +156,5 @@ def test_user_data_reserved_username():
         "email": "test@example.com",
         "username": "admin",
         "password": "Test123!@#",
-        "full_name": "Test User"
+        "full_name": "Test User",
     }

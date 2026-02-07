@@ -8,5 +8,5 @@ __all__ = [
     "SubmissionFilters",
     "AnalyticsResponse",
     "SubmissionResponse",
-    "SubmissionListResponse"
+    "SubmissionListResponse",
 ]

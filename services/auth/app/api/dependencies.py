@@ -25,7 +25,7 @@ security = HTTPBearer()
 async def get_audit_logger() -> AuditLogger:
     """
     Get audit logger instance (singleton).
-    
+
     Returns:
         AuditLogger instance
     """
@@ -34,15 +34,15 @@ async def get_audit_logger() -> AuditLogger:
 
 async def get_auth_service(
     db: AsyncSession = Depends(get_db),
-    audit_logger: AuditLogger = Depends(get_audit_logger)
+    audit_logger: AuditLogger = Depends(get_audit_logger),
 ) -> AuthService:
     """
     Get auth service instance.
-    
+
     Args:
         db: Database session
         audit_logger: Audit logger instance
-    
+
     Returns:
         AuthService instance
     """
@@ -51,28 +51,28 @@ async def get_auth_service(
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> User:
     """
     Get current authenticated user from JWT token.
-    
+
     Args:
         credentials: HTTP Bearer token
         db: Database session
-    
+
     Returns:
         Current user
-    
+
     Raises:
         HTTPException: If token is invalid or user not found
-    
+
     Usage:
         @app.get("/protected")
         async def protected_route(user: User = Depends(get_current_user)):
             return {"user_id": user.id}
     """
     token = credentials.credentials
-    
+
     # Decode token
     try:
         payload = decode_token(token)
@@ -82,7 +82,7 @@ async def get_current_user(
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Check token type
     if payload.get("token_type") != TokenType.ACCESS:
         raise HTTPException(
@@ -90,7 +90,7 @@ async def get_current_user(
             detail="Invalid token type",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Check if token is blacklisted
     jti = payload.get("jti")
     if jti and await is_token_blacklisted(jti):
@@ -99,48 +99,44 @@ async def get_current_user(
             detail="Token has been revoked",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Get user from database
     user_id = UUID(payload.get("sub"))
     user_repo = UserRepository(db)
     user = await user_repo.get_by_id(user_id)
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Check if user is active
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive"
+            status_code=status.HTTP_403_FORBIDDEN, detail="User account is inactive"
         )
-    
+
     return user
 
 
-async def get_current_active_user(
-    user: User = Depends(get_current_user)
-) -> User:
+async def get_current_active_user(user: User = Depends(get_current_user)) -> User:
     """
     Get current active user.
-    
+
     Args:
         user: Current user from token
-    
+
     Returns:
         Active user
-    
+
     Raises:
         HTTPException: If user is inactive
     """
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
     return user
 
@@ -148,40 +144,40 @@ async def get_current_active_user(
 def require_role(*allowed_roles: UserRole):
     """
     Dependency factory for role-based access control.
-    
+
     Args:
         *allowed_roles: Roles allowed to access the endpoint
-    
+
     Returns:
         Dependency function
-    
+
     Usage:
         @app.get("/admin")
         async def admin_route(user: User = Depends(require_role(UserRole.ADMIN))):
             return {"message": "Admin access granted"}
     """
+
     async def role_checker(user: User = Depends(get_current_user)) -> User:
         if user.role not in allowed_roles:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions"
             )
         return user
-    
+
     return role_checker
 
 
 async def get_client_ip(
     x_forwarded_for: Optional[str] = Header(None),
-    x_real_ip: Optional[str] = Header(None)
+    x_real_ip: Optional[str] = Header(None),
 ) -> Optional[str]:
     """
     Extract client IP address from headers.
-    
+
     Args:
         x_forwarded_for: X-Forwarded-For header
         x_real_ip: X-Real-IP header
-    
+
     Returns:
         Client IP address or None
     """
@@ -191,15 +187,13 @@ async def get_client_ip(
     return x_real_ip
 
 
-async def get_user_agent(
-    user_agent: Optional[str] = Header(None)
-) -> Optional[str]:
+async def get_user_agent(user_agent: Optional[str] = Header(None)) -> Optional[str]:
     """
     Extract user agent from headers.
-    
+
     Args:
         user_agent: User-Agent header
-    
+
     Returns:
         User agent string or None
     """

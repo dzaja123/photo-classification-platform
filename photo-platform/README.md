@@ -71,6 +71,30 @@ cp .env.example .env
 npm run dev
 ```
 
+### Creating the Admin User
+
+All users register with the `USER` role by default. To create the first admin account, use the provided seed script:
+
+```bash
+# Create admin with default credentials (admin_user / Admin123!@#)
+docker exec photo-platform-auth python scripts/create_admin.py
+
+# Or specify custom credentials via environment variables
+docker exec -e ADMIN_EMAIL=admin@example.com \
+            -e ADMIN_USERNAME=myadmin \
+            -e ADMIN_PASSWORD='MySecure123!@#' \
+            photo-platform-auth python scripts/create_admin.py
+```
+
+Default admin credentials (change after first login):
+| Field | Value |
+|-------|-------|
+| Email | `admin@admin.com` |
+| Username | `admin_user` |
+| Password | `Admin123!@#` |
+
+The script is idempotent — if an admin already exists it will skip creation. If the email/username is taken by a regular user, it promotes that user to admin.
+
 ### Docker Compose (Full Stack)
 
 ```bash

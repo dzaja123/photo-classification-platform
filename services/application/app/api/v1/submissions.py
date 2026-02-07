@@ -61,7 +61,7 @@ async def classify_submission_background(submission_id: uuid.UUID) -> None:
                 return
 
             # Mark as processing
-            submission.classification_status = SubmissionStatus.PROCESSING
+            submission.classification_status = SubmissionStatus.PROCESSING.value
             await db.commit()
 
             # Download photo from storage
@@ -74,7 +74,7 @@ async def classify_submission_background(submission_id: uuid.UUID) -> None:
 
             # Persist results
             submission.classification_results = predictions
-            submission.classification_status = SubmissionStatus.COMPLETED
+            submission.classification_status = SubmissionStatus.COMPLETED.value
             submission.classified_at = datetime.now(timezone.utc)
             submission.classification_error = None
             await db.commit()
@@ -88,7 +88,7 @@ async def classify_submission_background(submission_id: uuid.UUID) -> None:
                 )
                 submission = result.scalar_one_or_none()
                 if submission:
-                    submission.classification_status = SubmissionStatus.FAILED
+                    submission.classification_status = SubmissionStatus.FAILED.value
                     submission.classification_error = str(e)
                     await db.commit()
             except Exception:

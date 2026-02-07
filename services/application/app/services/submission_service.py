@@ -128,7 +128,7 @@ class SubmissionService:
             photo_path=photo_path,
             photo_size=file_size,
             photo_mime_type=photo.content_type,
-            classification_status=SubmissionStatus.PENDING,
+            classification_status=SubmissionStatus.PENDING.value,
             created_at=now,
             updated_at=now,
             is_deleted=False,

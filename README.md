@@ -51,7 +51,7 @@ A cloud-deployable, microservices-based platform where users register, upload ph
 ### Docker Compose (Recommended)
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/dzaja123/photo-classification-platform.git
 cd photo-platform
 
 # Start all services (backend + frontend + infrastructure)

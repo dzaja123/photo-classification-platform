@@ -1,9 +1,8 @@
 """FastAPI dependencies for authentication in Application Service."""
 
-from typing import Optional
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status, Header
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
@@ -76,22 +75,3 @@ async def get_current_user_id(
         )
 
     return user_id
-
-
-async def get_client_ip(
-    x_forwarded_for: Optional[str] = Header(None),
-    x_real_ip: Optional[str] = Header(None),
-) -> Optional[str]:
-    """
-    Extract client IP address from headers.
-
-    Args:
-        x_forwarded_for: X-Forwarded-For header
-        x_real_ip: X-Real-IP header
-
-    Returns:
-        Client IP address or None
-    """
-    if x_forwarded_for:
-        return x_forwarded_for.split(",")[0].strip()
-    return x_real_ip

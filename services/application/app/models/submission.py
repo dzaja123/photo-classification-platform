@@ -70,7 +70,7 @@ class Submission(Base):
     classification_status: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        default=SubmissionStatus.PENDING,
+        default=SubmissionStatus.PENDING.value,
         index=True,
         comment="Status: pending, processing, completed, failed",
     )

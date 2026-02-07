@@ -107,26 +107,6 @@ class AuditLogger:
 
         return await cursor.to_list(length=limit)
 
-    async def get_security_events(self, limit: int = 100, skip: int = 0) -> list:
-        """
-        Get recent security-related events.
-
-        Args:
-            limit: Maximum number of events to return
-            skip: Number of events to skip
-
-        Returns:
-            List of security audit log entries
-        """
-        cursor = (
-            self.collection.find({"event_type": {"$regex": "^security\\."}})
-            .sort("timestamp", -1)
-            .skip(skip)
-            .limit(limit)
-        )
-
-        return await cursor.to_list(length=limit)
-
     async def close(self):
         """Close MongoDB connection."""
         self.client.close()

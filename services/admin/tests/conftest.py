@@ -23,7 +23,10 @@ from app.api.dependencies import get_current_admin
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@postgres:5432/photo_platform_test",
+    os.getenv(
+        "DATABASE_URL",
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/photo_platform_test",
+    ),
 )
 
 ADMIN_PAYLOAD = {

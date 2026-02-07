@@ -24,7 +24,10 @@ from app.api.dependencies import get_current_user_id
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@postgres:5432/photo_platform_test",
+    os.getenv(
+        "DATABASE_URL",
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/photo_platform_test",
+    ),
 )
 
 TEST_USER_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
